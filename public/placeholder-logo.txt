@@ -1,0 +1,8 @@
+Place your LumaShift logo files here:
+
+1. logo.png           — Main logo (transparent PNG, ~240x60px or wider)
+2. logo-white.png     — White version for dark backgrounds
+3. favicon.ico        — 32x32 favicon
+4. apple-icon.png     — 180x180 for Apple devices
+
+See README.md for instructions on updating the Header component to use image logos.
