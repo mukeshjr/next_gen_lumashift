@@ -256,7 +256,7 @@ export const services: Service[] = [
     tier: 'professional',
     forWho: 'University clubs, bootcamps, and corporate L&D teams',
     description:
-      'Interactive group workshop covering cybersecurity career paths, resume writing, and interview strategies. Tailored to your audience's experience level.',
+      "Interactive group workshop covering cybersecurity career paths, resume writing, and interview strategies. Tailored to your audience's experience level.",
     outcomes: [
       'Live Q&A with practising cybersecurity professionals',
       'Resume and LinkedIn tips for cybersecurity',
