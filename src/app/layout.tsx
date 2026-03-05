@@ -3,6 +3,7 @@ import './globals.css';
 import { Providers } from '@/components/layout/Providers';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { ChatBot } from '@/components/chatbot/ChatBot';
 
 export const metadata: Metadata = {
   title: {
@@ -55,6 +56,7 @@ export default function RootLayout({
           <Header />
           <main className="min-h-screen pt-16">{children}</main>
           <Footer />
+          <ChatBot />
         </Providers>
       </body>
     </html>

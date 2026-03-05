@@ -5,9 +5,11 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Menu, X, Shield, ChevronDown } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import { UserMenu } from '@/components/auth/UserMenu';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
-const navLinks = [
+const PUBLIC_NAV = [
   { href: '/', label: 'Home' },
   { href: '/services', label: 'Services' },
   { href: '/team', label: 'Team' },
@@ -30,9 +32,14 @@ const navLinks = [
 
 export function Header() {
   const pathname = usePathname();
+  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+  const navLinks = user
+    ? [...PUBLIC_NAV, { href: '/dashboard', label: 'Dashboard' }]
+    : PUBLIC_NAV;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -137,6 +144,7 @@ export function Header() {
           {/* Right side */}
           <div className="flex items-center gap-3">
             <ThemeToggle />
+            <UserMenu />
             <Link
               href="/contact"
               className="hidden sm:inline-flex btn-primary text-sm py-2 px-4"

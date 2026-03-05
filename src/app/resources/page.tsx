@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Download, Lock, FileText, CheckSquare, BookOpen, Video, ArrowRight, Unlock } from 'lucide-react';
 import { getFreeResources, getPremiumResources, getAllResourceCategories } from '@/data/resources';
 import { ResourceUnlockForm } from '@/components/forms/ResourceUnlockForm';
+import { BookmarkButton } from '@/components/resources/BookmarkButton';
 import { Resource } from '@/types';
 
 const iconMap: Record<Resource['type'], React.ReactNode> = {
@@ -96,13 +97,16 @@ export default function ResourcesPage() {
                 <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed flex-1 mb-4">
                   {resource.description}
                 </p>
-                <a
-                  href={resource.downloadUrl ?? '#'}
-                  download
-                  className="btn-primary text-sm py-2 justify-center"
-                >
-                  <Download size={15} /> Download Free
-                </a>
+                <div className="flex gap-2">
+                  <a
+                    href={resource.downloadUrl ?? '#'}
+                    download
+                    className="btn-primary text-sm py-2 flex-1 justify-center"
+                  >
+                    <Download size={15} /> Download Free
+                  </a>
+                  <BookmarkButton resourceId={resource.id} title={resource.title} />
+                </div>
               </div>
             ))}
           </div>

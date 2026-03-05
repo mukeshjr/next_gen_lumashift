@@ -2,7 +2,7 @@ import { TeamMember } from '@/types';
 
 export const team: TeamMember[] = [
   {
-    name: 'Mukesh Vijaiyan',
+    name: 'Mukesh Vijaian',
     role: 'Co-Founder & Lead Career Coach',
     bio: `Mukesh is a cybersecurity practitioner and career coach with hands-on experience across Security Operations, Cloud Security, and Threat Intelligence. He has helped dozens of professionals across Malaysia break into and advance in the cybersecurity industry.
 
@@ -45,7 +45,7 @@ Lavanyah is particularly passionate about helping underrepresented groups (women
       'Certified in Risk and Information Systems Control (CRISC) – pursuing',
       'CompTIA Security+',
     ],
-    linkedIn: 'https://www.linkedin.com/in/lavanyah-prabu/',
+    linkedIn: 'https://www.linkedin.com/in/lavanyahprabu/',
     email: 'lumashift@outlook.com',
     avatar: '/team/lavanyah.jpg',
   },

@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, Clock, ArrowLeft, Tag, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, ArrowLeft, Tag, ArrowRight, CheckCircle, BarChart2, GitBranch, Clock3, Table2, Lightbulb } from 'lucide-react';
 import { getPostBySlug, getPublishedPosts } from '@/data/blog-posts';
 import { formatDate } from '@/lib/utils';
+import { SaveButton } from '@/components/blog/SaveButton';
+import { BlogActivityTracker } from '@/components/blog/BlogActivityTracker';
 
 interface Params {
   params: { slug: string };
@@ -22,24 +24,112 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-// Very simple markdown-to-HTML renderer (avoids adding remark as a dependency)
+const VISUAL_ICONS: Record<string, React.ReactNode> = {
+  'threat-landscape': <BarChart2 size={16} className="text-red-500" />,
+  'career-path': <GitBranch size={16} className="text-green-500" />,
+  'concept-diagram': <Lightbulb size={16} className="text-yellow-500" />,
+  'timeline': <Clock3 size={16} className="text-blue-500" />,
+  'comparison-table': <Table2 size={16} className="text-purple-500" />,
+};
+
+const VISUAL_LABELS: Record<string, string> = {
+  'threat-landscape': 'Threat Landscape',
+  'career-path': 'Career Path Guide',
+  'concept-diagram': 'Concept Explainer',
+  'timeline': 'Day-in-the-Life',
+  'comparison-table': 'Comparison Guide',
+};
+
+// Markdown-to-HTML renderer
 function renderMarkdown(content: string): string {
-  return content
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+  const lines = content.split('\n');
+  const result: string[] = [];
+  let inList = false;
+  let inTable = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+
+    // Table rows
+    if (line.trim().startsWith('|')) {
+      if (!inTable) {
+        result.push('<div class="overflow-x-auto my-6"><table class="w-full text-sm border-collapse">');
+        inTable = true;
+      }
+      // Skip separator rows like |---|---|
+      if (line.match(/^\|[\s\-:|]+\|/)) continue;
+      const cells = line.split('|').filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+      const isHeader = i === lines.findIndex(l => l.trim().startsWith('|'));
+      const tag = isHeader ? 'th' : 'td';
+      const cellClass = isHeader
+        ? 'class="px-4 py-2 text-left font-semibold bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700"'
+        : 'class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"';
+      result.push(`<tr>${cells.map(c => `<${tag} ${cellClass}>${formatInline(c.trim())}</${tag}>`).join('')}</tr>`);
+      continue;
+    } else if (inTable) {
+      result.push('</table></div>');
+      inTable = false;
+    }
+
+    // Blank line closes list
+    if (line.trim() === '') {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push('');
+      continue;
+    }
+
+    // H2
+    if (line.startsWith('## ')) {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push(`<h2>${formatInline(line.slice(3))}</h2>`);
+      continue;
+    }
+
+    // H3
+    if (line.startsWith('### ')) {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push(`<h3>${formatInline(line.slice(4))}</h3>`);
+      continue;
+    }
+
+    // HR
+    if (line.trim() === '---') {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push('<hr/>');
+      continue;
+    }
+
+    // List item
+    if (line.startsWith('- ')) {
+      if (!inList) { result.push('<ul>'); inList = true; }
+      result.push(`<li>${formatInline(line.slice(2))}</li>`);
+      continue;
+    }
+
+    // Numbered list
+    if (/^\d+\. /.test(line)) {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push(`<li>${formatInline(line.replace(/^\d+\. /, ''))}</li>`);
+      continue;
+    }
+
+    // Regular paragraph
+    if (inList) { result.push('</ul>'); inList = false; }
+    result.push(`<p>${formatInline(line)}</p>`);
+  }
+
+  if (inTable) result.push('</table></div>');
+  if (inList) result.push('</ul>');
+
+  return result.join('\n');
+}
+
+function formatInline(text: string): string {
+  return text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
     .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/---/g, '<hr/>')
-    .replace(/^(.+)$/gm, (line) => {
-      if (line.startsWith('<h') || line.startsWith('<ul') || line.startsWith('<li') || line.startsWith('<hr')) return line;
-      if (line.trim() === '') return '';
-      return `<p>${line}</p>`;
-    });
+    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
 }
 
 export default function BlogPostPage({ params }: Params) {
@@ -59,13 +149,19 @@ export default function BlogPostPage({ params }: Params) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
             href="/blog"
-            className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-orange-500 mb-6"
+            className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-orange-500 mb-6 transition-colors"
           >
             <ArrowLeft size={16} /> Back to Blog
           </Link>
 
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
             <span className="badge-orange">{post.category}</span>
+            {post.visualType && (
+              <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full font-medium">
+                {VISUAL_ICONS[post.visualType]}
+                {VISUAL_LABELS[post.visualType]}
+              </span>
+            )}
             <span className="flex items-center gap-1 text-xs text-gray-400">
               <Clock size={12} /> {post.readTime}
             </span>
@@ -79,17 +175,21 @@ export default function BlogPostPage({ params }: Params) {
             {post.excerpt}
           </p>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center text-orange-500 font-bold text-sm">
-                {post.author[0]}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center text-orange-500 font-bold text-sm">
+                  {post.author[0]}
+                </div>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{post.author}</span>
               </div>
-              <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{post.author}</span>
+              <span className="flex items-center gap-1 text-sm text-gray-400">
+                <Calendar size={14} /> {formatDate(post.date)}
+              </span>
             </div>
-            <span className="flex items-center gap-1 text-sm text-gray-400">
-              <Calendar size={14} /> {formatDate(post.date)}
-            </span>
+            <SaveButton slug={post.slug} title={post.title} />
           </div>
+          <BlogActivityTracker slug={post.slug} title={post.title} />
 
           <div className="flex flex-wrap gap-2 mt-6">
             {post.tags.map((tag) => (
@@ -100,6 +200,28 @@ export default function BlogPostPage({ params }: Params) {
           </div>
         </div>
       </section>
+
+      {/* Key Takeaways */}
+      {post.keyTakeaways && post.keyTakeaways.length > 0 && (
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+          <div className="bg-orange-50 dark:bg-orange-500/5 border border-orange-200 dark:border-orange-500/20 rounded-2xl p-6">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <CheckCircle size={18} className="text-orange-500 shrink-0" />
+              Key Takeaways
+            </h2>
+            <ul className="space-y-2.5">
+              {post.keyTakeaways.map((point, i) => (
+                <li key={i} className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  <span className="w-5 h-5 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Article body */}
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
@@ -113,7 +235,8 @@ export default function BlogPostPage({ params }: Params) {
             prose-strong:text-gray-900 dark:prose-strong:text-white
             prose-ul:my-4 prose-li:text-gray-600 dark:prose-li:text-gray-300
             prose-code:text-orange-600 dark:prose-code:text-orange-400 prose-code:bg-orange-50 dark:prose-code:bg-orange-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
-            prose-hr:border-gray-200 dark:prose-hr:border-gray-800"
+            prose-hr:border-gray-200 dark:prose-hr:border-gray-800
+            prose-table:text-sm"
           dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
         />
 

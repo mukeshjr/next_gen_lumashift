@@ -6,6 +6,16 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'media.licdn.com',
       },
+      {
+        // Supabase storage for user avatars
+        protocol: 'https',
+        hostname: '*.supabase.co',
+      },
+      {
+        // Google profile pictures (OAuth)
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
     ],
   },
 };

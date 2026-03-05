@@ -1,6 +1,89 @@
 # LumaShift Website
 
-Modern cybersecurity career coaching website for LumaShift. Built with Next.js 14, TypeScript, and Tailwind CSS.
+Modern cybersecurity career coaching website for LumaShift. Built with Next.js, TypeScript, Tailwind CSS, and Supabase.
+
+---
+
+## User Accounts & Gamification Setup (Supabase)
+
+LumaShift uses **Supabase** for passwordless authentication, user profiles, and gamification.
+
+### 1. Create a Supabase Project
+
+1. Go to [supabase.com](https://supabase.com) and create a free account
+2. Create a new project
+3. Copy your **Project URL** and **anon key** from `Settings → API`
+
+### 2. Set Up the Database Schema
+
+1. In your Supabase dashboard, go to **SQL Editor**
+2. Open `src/lib/supabase/schema.sql` from this project
+3. Paste the entire file contents and click **Run**
+
+This creates:
+- `profiles` — User career profiles
+- `activity_logs` — Engagement tracking
+- `saved_items` — Blog + resource bookmarks
+- `quiz_results` — Career quiz history
+- `service_interests` — Service views/requests
+- `user_badges` — Earned achievements
+
+### 3. Configure Google OAuth
+
+1. In Supabase: **Authentication → Providers → Google → Enable**
+2. Go to [Google Cloud Console](https://console.cloud.google.com)
+3. Create OAuth 2.0 credentials
+4. Set Authorized redirect URI to: `https://YOUR_PROJECT.supabase.co/auth/v1/callback`
+5. Copy **Client ID** and **Client Secret** back to Supabase
+
+### 4. Configure Email Magic Links
+
+Email magic links work automatically via Supabase Auth — no extra setup needed.
+
+**Optional: Custom SMTP** (for branded emails)
+- Supabase → `Authentication → Email Templates` — customise the login email
+- Supabase → `Settings → Auth → SMTP` — add your SMTP server
+
+### 5. Set Environment Variables
+
+Add to your `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+```
+
+### Authentication Flow
+
+**Google OAuth:**
+1. User clicks "Continue with Google"
+2. Redirected to Google → Google confirms identity
+3. Supabase callback at `/auth/callback?code=...`
+4. Session created → User redirected to `/dashboard`
+
+**Email Magic Link:**
+1. User enters email → Supabase sends a one-time link (expires 1 hour)
+2. User clicks link → Supabase callback at `/auth/callback?token_hash=...`
+3. Session verified → User redirected to `/dashboard`
+4. Links are single-use and expire after 1 hour (Supabase default)
+5. UI enforces a 60-second cooldown between resend requests
+
+### Login-Gated Features
+
+| Feature | Auth Required | Reason |
+|---------|--------------|--------|
+| Career Quiz | Yes | Save results, award points/badges |
+| Save blog posts | Yes | Requires user account |
+| Bookmark resources | Yes | Requires user account |
+| Dashboard | Yes | Personal data |
+| Profile editing | Yes | Personal data |
+| Homepage | No | Public marketing |
+| Services page | No | Public marketing |
+| Blog previews | No | Public content |
+| Career pages | No | Public content |
+| Contact page | No | Public contact |
+
+---
 
 ---
 

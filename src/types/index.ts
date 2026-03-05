@@ -24,6 +24,8 @@ export interface BlogPost {
   readTime: string;
   published: boolean;
   coverImage?: string;
+  visualType?: 'threat-landscape' | 'career-path' | 'concept-diagram' | 'timeline' | 'comparison-table';
+  keyTakeaways?: string[];
 }
 
 export interface Resource {
@@ -102,4 +104,78 @@ export interface FormData {
   careerGoal?: string;
   experienceLevel?: string;
   formType: 'contact' | 'resource_unlock' | 'quiz_result';
+}
+
+// ─── User / Auth Types ────────────────────────────────────────────────────────
+
+export interface UserProfile {
+  id: string;
+  name: string | null;
+  email: string;
+  avatar_url: string | null;
+  location: string | null;
+  current_role: string | null;
+  years_experience: number | null;
+  career_stage: string | null;
+  target_roles: string[];
+  current_skills: string[];
+  certifications_obtained: string[];
+  certifications_planned: string[];
+  total_points: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ActivityLog {
+  id: string;
+  user_id: string;
+  event_type: string;
+  item_id: string | null;
+  item_title: string | null;
+  metadata: Record<string, unknown>;
+  points_awarded: number;
+  created_at: string;
+}
+
+export interface SavedItem {
+  id: string;
+  user_id: string;
+  item_type: 'blog_post' | 'resource';
+  item_id: string;
+  item_title: string;
+  item_data: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface QuizResultRecord {
+  id: string;
+  user_id: string;
+  confidence_score: number;
+  recommended_roles: string[];
+  recommended_services: string[];
+  strengths: string[];
+  gaps: string[];
+  talk_to_coach: boolean;
+  answers: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface UserBadge {
+  id: string;
+  user_id: string;
+  badge_id: string;
+  badge_name: string;
+  badge_description: string | null;
+  badge_icon: string | null;
+  earned_at: string;
+}
+
+export interface ServiceInterest {
+  id: string;
+  user_id: string;
+  service_id: string;
+  service_title: string | null;
+  interest_type: 'viewed' | 'requested' | 'subscribed' | 'coaching_requested';
+  metadata: Record<string, unknown>;
+  created_at: string;
 }
