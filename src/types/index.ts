@@ -114,7 +114,7 @@ export interface UserProfile {
   email: string;
   avatar_url: string | null;
   location: string | null;
-  current_role: string | null;
+  job_role: string | null;
   years_experience: number | null;
   career_stage: string | null;
   target_roles: string[];

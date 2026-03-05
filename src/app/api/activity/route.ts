@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('name, current_role, years_experience, career_stage, target_roles, current_skills')
+    .select('name, job_role, years_experience, career_stage, target_roles, current_skills')
     .eq('id', user.id)
     .single();
 

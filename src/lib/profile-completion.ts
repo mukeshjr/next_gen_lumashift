@@ -1,7 +1,7 @@
 export interface ProfileData {
   name?: string | null;
   location?: string | null;
-  current_role?: string | null;
+  job_role?: string | null;
   years_experience?: number | null;
   career_stage?: string | null;
   target_roles?: string[] | null;
@@ -18,7 +18,7 @@ interface FieldWeight {
 
 const FIELDS: FieldWeight[] = [
   { label: 'Name',                  weight: 15, check: (p) => !!p.name?.trim() },
-  { label: 'Current Role',          weight: 15, check: (p) => !!p.current_role?.trim() },
+  { label: 'Current Role',          weight: 15, check: (p) => !!p.job_role?.trim() },
   { label: 'Target Roles',          weight: 20, check: (p) => (p.target_roles?.length ?? 0) > 0 },
   { label: 'Current Skills',        weight: 20, check: (p) => (p.current_skills?.length ?? 0) > 0 },
   { label: 'Years of Experience',   weight: 10, check: (p) => p.years_experience != null },

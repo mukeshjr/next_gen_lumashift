@@ -13,7 +13,7 @@ CREATE TABLE public.profiles (
   avatar_url      TEXT,
   location        TEXT,
   -- Career
-  current_role    TEXT,
+  job_role    TEXT,
   years_experience INTEGER,
   career_stage    TEXT CHECK (career_stage IN (
     'student', 'fresh_graduate', 'entry_level', 'mid_career', 'senior', 'career_switcher'

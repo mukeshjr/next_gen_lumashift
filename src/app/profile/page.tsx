@@ -41,7 +41,7 @@ const COMMON_CERTS = [
 type Profile = {
   name: string;
   location: string;
-  current_role: string;
+  job_role: string;
   years_experience: string;
   career_stage: string;
   target_roles: string[];
@@ -133,7 +133,7 @@ export default function ProfilePage() {
   const [form, setForm] = useState<Profile>({
     name: '',
     location: '',
-    current_role: '',
+    job_role: '',
     years_experience: '',
     career_stage: '',
     target_roles: [],
@@ -152,7 +152,7 @@ export default function ProfilePage() {
           setForm({
             name: data.name ?? '',
             location: data.location ?? '',
-            current_role: data.current_role ?? '',
+            job_role: data.job_role ?? '',
             years_experience: data.years_experience?.toString() ?? '',
             career_stage: data.career_stage ?? '',
             target_roles: data.target_roles ?? [],
@@ -297,8 +297,8 @@ export default function ProfilePage() {
                 </label>
                 <input
                   type="text"
-                  value={form.current_role}
-                  onChange={(e) => setForm((f) => ({ ...f, current_role: e.target.value }))}
+                  value={form.job_role}
+                  onChange={(e) => setForm((f) => ({ ...f, job_role: e.target.value }))}
                   placeholder="e.g. IT Support, Network Engineer"
                   className="form-input w-full"
                 />

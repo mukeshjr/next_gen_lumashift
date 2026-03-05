@@ -32,7 +32,7 @@ export async function PUT(req: NextRequest) {
   // Only allow safe fields
   const allowed = [
     'name', 'location', 'avatar_url',
-    'current_role', 'years_experience', 'career_stage',
+    'job_role', 'years_experience', 'career_stage',
     'target_roles', 'current_skills', 'certifications_obtained', 'certifications_planned',
   ];
   const update: Record<string, unknown> = {};
