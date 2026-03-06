@@ -7,7 +7,6 @@ import {
   Zap,
   Users,
   BarChart2,
-  CheckCircle,
   Star,
 } from 'lucide-react';
 import { TestimonialSlider } from '@/components/home/TestimonialSlider';
@@ -72,7 +71,7 @@ export default function HomePage() {
               🇲🇾 Cybersecurity Career Coaching — Malaysia &amp; Beyond
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white mt-6 leading-[1.05] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-gray-900 dark:text-white mt-6 leading-[1.05] tracking-tight">
               Land Your Dream{' '}
               <span className="gradient-text">Cybersecurity</span>{' '}
               Role

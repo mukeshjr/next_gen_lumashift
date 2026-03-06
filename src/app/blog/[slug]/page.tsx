@@ -44,84 +44,119 @@ const VISUAL_LABELS: Record<string, string> = {
 function renderMarkdown(content: string): string {
   const lines = content.split('\n');
   const result: string[] = [];
-  let inList = false;
+  let listType: 'ul' | 'ol' | null = null;
   let inTable = false;
+  let tableIsFirstRow = false;
+  let inCodeBlock = false;
+  let codeLang = '';
+  let codeLines: string[] = [];
+
+  const closeList = () => {
+    if (listType) { result.push(listType === 'ul' ? '</ul>' : '</ol>'); listType = null; }
+  };
 
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
+    const line = lines[i];
+
+    // Fenced code block open/close
+    if (line.startsWith('```')) {
+      if (!inCodeBlock) {
+        closeList();
+        inCodeBlock = true;
+        codeLang = line.slice(3).trim();
+        codeLines = [];
+      } else {
+        const langClass = codeLang ? ` class="language-${codeLang}"` : '';
+        result.push(`<pre class="overflow-x-auto my-6 rounded-xl bg-gray-900 dark:bg-gray-950 p-4 text-sm"><code${langClass} class="text-gray-100">${codeLines.map(escapeHtml).join('\n')}</code></pre>`);
+        inCodeBlock = false;
+        codeLang = '';
+        codeLines = [];
+      }
+      continue;
+    }
+    if (inCodeBlock) { codeLines.push(line); continue; }
 
     // Table rows
     if (line.trim().startsWith('|')) {
       if (!inTable) {
+        closeList();
         result.push('<div class="overflow-x-auto my-6"><table class="w-full text-sm border-collapse">');
         inTable = true;
+        tableIsFirstRow = true;
       }
       // Skip separator rows like |---|---|
-      if (line.match(/^\|[\s\-:|]+\|/)) continue;
+      if (/^\|[\s\-:|]+\|/.test(line.trim())) continue;
       const cells = line.split('|').filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
-      const isHeader = i === lines.findIndex(l => l.trim().startsWith('|'));
-      const tag = isHeader ? 'th' : 'td';
-      const cellClass = isHeader
+      const tag = tableIsFirstRow ? 'th' : 'td';
+      const cellClass = tableIsFirstRow
         ? 'class="px-4 py-2 text-left font-semibold bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700"'
         : 'class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"';
       result.push(`<tr>${cells.map(c => `<${tag} ${cellClass}>${formatInline(c.trim())}</${tag}>`).join('')}</tr>`);
+      tableIsFirstRow = false;
       continue;
     } else if (inTable) {
       result.push('</table></div>');
       inTable = false;
     }
 
-    // Blank line closes list
+    // Blank line — close open blocks, skip producing output
     if (line.trim() === '') {
-      if (inList) { result.push('</ul>'); inList = false; }
-      result.push('');
+      closeList();
       continue;
     }
 
     // H2
     if (line.startsWith('## ')) {
-      if (inList) { result.push('</ul>'); inList = false; }
+      closeList();
       result.push(`<h2>${formatInline(line.slice(3))}</h2>`);
       continue;
     }
 
     // H3
     if (line.startsWith('### ')) {
-      if (inList) { result.push('</ul>'); inList = false; }
+      closeList();
       result.push(`<h3>${formatInline(line.slice(4))}</h3>`);
       continue;
     }
 
     // HR
     if (line.trim() === '---') {
-      if (inList) { result.push('</ul>'); inList = false; }
+      closeList();
       result.push('<hr/>');
       continue;
     }
 
-    // List item
+    // Unordered list item
     if (line.startsWith('- ')) {
-      if (!inList) { result.push('<ul>'); inList = true; }
+      if (listType !== 'ul') { closeList(); result.push('<ul>'); listType = 'ul'; }
       result.push(`<li>${formatInline(line.slice(2))}</li>`);
       continue;
     }
 
-    // Numbered list
+    // Ordered list item
     if (/^\d+\. /.test(line)) {
-      if (inList) { result.push('</ul>'); inList = false; }
+      if (listType !== 'ol') { closeList(); result.push('<ol>'); listType = 'ol'; }
       result.push(`<li>${formatInline(line.replace(/^\d+\. /, ''))}</li>`);
       continue;
     }
 
     // Regular paragraph
-    if (inList) { result.push('</ul>'); inList = false; }
+    closeList();
     result.push(`<p>${formatInline(line)}</p>`);
   }
 
   if (inTable) result.push('</table></div>');
-  if (inList) result.push('</ul>');
+  closeList();
 
   return result.join('\n');
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function formatInline(text: string): string {
@@ -167,7 +202,7 @@ export default function BlogPostPage({ params }: Params) {
             </span>
           </div>
 
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-tight mb-6">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-tight mb-6">
             {post.title}
           </h1>
 
