@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Calendar, Clock, ArrowLeft, Tag, ArrowRight, CheckCircle, BarChart2, GitBranch, Clock3, Table2, Lightbulb } from 'lucide-react';
-import { getPostBySlug, getPublishedPosts } from '@/data/blog-posts';
+import { getPublishedPosts } from '@/data/blog-posts';
+import { getPostBySlug } from '@/lib/blog';
 import { formatDate } from '@/lib/utils';
 import { SaveButton } from '@/components/blog/SaveButton';
 import { BlogActivityTracker } from '@/components/blog/BlogActivityTracker';
@@ -16,7 +17,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const post = getPostBySlug(params.slug);
+  const post = await getPostBySlug(params.slug);
   if (!post || !post.published) return { title: 'Post Not Found' };
   return {
     title: post.title,
@@ -167,8 +168,8 @@ function formatInline(text: string): string {
     .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
 }
 
-export default function BlogPostPage({ params }: Params) {
-  const post = getPostBySlug(params.slug);
+export default async function BlogPostPage({ params }: Params) {
+  const post = await getPostBySlug(params.slug);
 
   if (!post || !post.published) notFound();
 

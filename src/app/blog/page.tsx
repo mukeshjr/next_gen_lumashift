@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getPublishedPosts, getAllCategories, getAllTags } from '@/data/blog-posts';
+import { getAllPublishedPosts, getAllCategories, getAllTags } from '@/lib/blog';
 import { BlogFilter } from '@/components/blog/BlogFilter';
 
 export const metadata: Metadata = {
@@ -8,10 +8,12 @@ export const metadata: Metadata = {
     'Practical, direct cybersecurity career insights from LumaShift — covering AI security, cloud security, GRC, Malaysian market trends, and career strategy.',
 };
 
-export default function BlogPage() {
-  const posts = getPublishedPosts();
-  const categories = getAllCategories();
-  const tags = getAllTags();
+export default async function BlogPage() {
+  const [posts, categories, tags] = await Promise.all([
+    getAllPublishedPosts(),
+    getAllCategories(),
+    getAllTags(),
+  ]);
 
   return (
     <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">

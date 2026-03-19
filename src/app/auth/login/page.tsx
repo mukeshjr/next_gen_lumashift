@@ -39,10 +39,11 @@ function LoginContent() {
     setError('');
     const supabase = createClient();
 
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+        redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
       },
     });
 
@@ -60,10 +61,11 @@ function LoginContent() {
     setError('');
     const supabase = createClient();
 
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+        emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
         shouldCreateUser: true,
       },
     });
