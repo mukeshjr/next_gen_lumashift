@@ -16,6 +16,16 @@ const config: Config = {
           'orange-dark': '#EA580C',
           'orange-subtle': '#FFF7ED',
         },
+        cyber: {
+          midnight: '#0B1120',
+          surface: '#131B2E',
+          card: '#1A2340',
+          border: '#243049',
+          cyan: '#06B6D4',
+          'cyan-light': '#22D3EE',
+          'cyan-dark': '#0891B2',
+          teal: '#14B8A6',
+        },
         dark: {
           bg: '#0A0A0A',
           surface: '#141414',
@@ -34,8 +44,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        heading: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
+        heading: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

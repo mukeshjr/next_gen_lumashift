@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('name, job_role, years_experience, career_stage, target_roles, current_skills')
+    .select('name, job_role, years_experience, career_stage, target_roles, current_skills, certifications_planned')
     .eq('id', user.id)
     .single();
 
@@ -96,13 +96,21 @@ export async function POST(req: NextRequest) {
   const { score: profileScore } = computeProfileCompletion(profile ?? {});
 
   const logs = activityCounts ?? [];
+  const savedCount = (savedCounts ?? []).length;
   const ctx = {
     profileScore,
     rolesExplored: logs.filter((l) => l.event_type === 'role_explored').length,
     blogsRead: logs.filter((l) => l.event_type === 'blog_read').length,
     quizzesTaken: (quizCounts ?? []).length,
     rolesCompared: logs.filter((l) => l.event_type === 'roles_compared').length,
-    resourcesSaved: (savedCounts ?? []).length,
+    resourcesSaved: savedCount,
+    servicesViewed: logs.filter((l) => l.event_type === 'service_viewed').length,
+    roadmapViewed: logs.some((l) => l.event_type === 'roadmap_viewed'),
+    skillGapViewed: logs.some((l) => l.event_type === 'skill_gap_viewed'),
+    hasSavedItem: savedCount > 0,
+    hasCertPlanned: (profile?.certifications_planned?.length ?? 0) > 0,
+    profileComplete: profileScore >= 100,
+    streakDays: 0, // Streak calculation is handled separately
   };
 
   const earned = checkEarnedBadges(ctx);

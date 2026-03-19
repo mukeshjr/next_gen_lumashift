@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 
-const LUMASHIFT_CONTEXT = `You are LumaShift's career coaching assistant. LumaShift is a Malaysian cybersecurity career coaching platform founded by Mukesh Vijaian and Lavanyah Prabu.
+const LUMASHIFT_CONTEXT = `You are LumaShift's AI Career Advisor — not just a chatbot. You are a knowledgeable, warm, direct cybersecurity career coach.
+
+ABOUT LUMASHIFT:
+LumaShift is a Malaysian cybersecurity career coaching platform founded by Mukesh Vijaian and Lavanyah Prabu. We help professionals break into and grow within cybersecurity.
 
 SERVICES OFFERED:
 - Resume Review (From RM 150) — ATS-optimised resume for cybersecurity roles
@@ -19,85 +23,153 @@ SERVICES OFFERED:
 - Cybersecurity Workshop (From RM 800, group) — For universities and corporates
 
 TEAM:
-- Mukesh Vijaian — Co-Founder & Lead Career Coach. Expertise: SOC, Cloud Security, Threat Intelligence. LinkedIn: linkedin.com/in/mukeshvijaian/
-- Lavanyah Prabu — Co-Founder & Career Strategy Coach. Expertise: GRC, Risk, Compliance, Soft Skills. LinkedIn: linkedin.com/in/lavanyahprabu/
+- Mukesh Vijaian — Co-Founder & Lead Career Coach. Expertise: SOC, Cloud Security, Threat Intelligence.
+- Lavanyah Prabu — Co-Founder & Career Strategy Coach. Expertise: GRC, Risk, Compliance, Soft Skills.
 
 CAREER PATHS COVERED:
 Security Analyst, Security Engineer, GRC Analyst, Cloud Security Engineer, SOC Analyst, OT/ICS Security Specialist
 
-CONTACT: lumashift@outlook.com — responds within 24 hours. Sessions via Google Meet/Zoom.
+SALARY BENCHMARKS (Malaysia, monthly):
+- SOC Analyst: RM 3,500–9,000
+- Security Analyst: RM 4,000–8,000
+- GRC Analyst: RM 5,000–12,000
+- Security Engineer: RM 7,000–15,000
+- Cloud Security Engineer: RM 8,000–18,000
+- OT/ICS Security: RM 8,000–20,000
 
-BLOG TOPICS: AI security threats, cloud security careers, zero trust architecture, GRC careers in Malaysia, cybersecurity awareness, Malaysian job market.
+PLATFORM FEATURES:
+- Career Quiz (/quiz) — personalised role and service recommendations
+- Career Roadmap (/roadmap) — stage-by-stage progression for each role
+- Skill Gap Analysis (/skill-gap) — radar chart showing skills vs requirements
+- Achievements (/achievements) — gamification with badges and milestones
+- Compare Roles (/compare-roles) — side-by-side role comparison
+- Free Resources (/resources) — resume templates, cert roadmaps, checklists
 
-FREE RESOURCES: Cybersecurity resume template, top 50 interview questions guide, certification roadmap 2025, LinkedIn optimisation checklist.
+CONTACT: lumashift@outlook.com — responds within 24 hours. Sessions via Google Meet/Zoom.`;
 
-YOUR ROLE:
-- Help users understand which LumaShift services match their situation
-- Provide honest, practical cybersecurity career advice
-- Answer questions about certifications, salaries, career paths
-- Recommend the Career Quiz at /quiz for personalised guidance
-- For complex or sensitive decisions, encourage users to contact us at lumashift@outlook.com
-- Keep responses concise, warm, direct, and practical
-- If unsure about specific details, direct users to contact LumaShift directly
-- Do NOT make up salary figures beyond what is stated above`;
+const ADVISOR_INSTRUCTIONS = `YOUR ROLE AS AI CAREER ADVISOR:
+- You have access to the user's profile data (if logged in). Use it to give PERSONALISED advice.
+- Reference their specific skills, certifications, target roles, and gaps when relevant.
+- Be specific: "Based on your interest in cloud security and your Python skills, I'd recommend..."
+- Proactively suggest the Career Roadmap, Skill Gap Analysis, or Quiz when they'd benefit from them.
+- For complex or sensitive decisions, encourage booking a human consultation.
+- Keep responses concise (2-4 paragraphs max), warm, direct, and actionable.
+- Use markdown formatting for readability (bold, bullets, links).
+- When recommending services, explain WHY it fits their specific situation.
+- If the user hasn't completed their profile, gently encourage them to do so.
+- Do NOT make up information. If unsure, direct to lumashift@outlook.com.
+- Always end with a clear next action the user can take.`;
+
+function buildUserContext(profile: Record<string, unknown> | null, quizResult: Record<string, unknown> | null): string {
+  if (!profile) return '\n\nUSER CONTEXT: This user is not logged in. Encourage them to create an account and complete their profile for personalised guidance.';
+
+  const parts: string[] = ['\n\nUSER CONTEXT (use this to personalise your responses):'];
+
+  if (profile.name) parts.push(`- Name: ${profile.name}`);
+  if (profile.job_role) parts.push(`- Current Role: ${profile.job_role}`);
+  if (profile.career_stage) parts.push(`- Career Stage: ${profile.career_stage}`);
+  if (profile.years_experience != null) parts.push(`- Years of Experience: ${profile.years_experience}`);
+  if (profile.location) parts.push(`- Location: ${profile.location}`);
+
+  const targetRoles = profile.target_roles as string[] | undefined;
+  if (targetRoles?.length) parts.push(`- Target Roles: ${targetRoles.join(', ')}`);
+
+  const currentSkills = profile.current_skills as string[] | undefined;
+  if (currentSkills?.length) parts.push(`- Current Skills: ${currentSkills.join(', ')}`);
+
+  const certsObtained = profile.certifications_obtained as string[] | undefined;
+  if (certsObtained?.length) parts.push(`- Certifications Obtained: ${certsObtained.join(', ')}`);
+
+  const certsPlanned = profile.certifications_planned as string[] | undefined;
+  if (certsPlanned?.length) parts.push(`- Certifications Planned: ${certsPlanned.join(', ')}`);
+
+  if (quizResult) {
+    parts.push('');
+    parts.push('QUIZ RESULTS:');
+    if (quizResult.confidence_score != null) parts.push(`- Confidence Score: ${quizResult.confidence_score}/5`);
+    const recRoles = quizResult.recommended_roles as string[] | undefined;
+    if (recRoles?.length) parts.push(`- Recommended Roles: ${recRoles.join(', ')}`);
+    const strengths = quizResult.strengths as string[] | undefined;
+    if (strengths?.length) parts.push(`- Strengths: ${strengths.join(', ')}`);
+    const gaps = quizResult.gaps as string[] | undefined;
+    if (gaps?.length) parts.push(`- Gaps to Address: ${gaps.join(', ')}`);
+    if (quizResult.talk_to_coach) parts.push('- Flag: User should speak with a human coach');
+  }
+
+  // Missing profile fields
+  const missing: string[] = [];
+  if (!profile.name) missing.push('name');
+  if (!profile.job_role) missing.push('current role');
+  if (!targetRoles?.length) missing.push('target roles');
+  if (!currentSkills?.length) missing.push('current skills');
+  if (missing.length > 0) {
+    parts.push(`\nProfile Incomplete — missing: ${missing.join(', ')}. Gently encourage them to complete their profile at /profile.`);
+  }
+
+  return parts.join('\n');
+}
 
 // Rule-based fallback responses when no Anthropic API key
 const FALLBACK_RULES: { patterns: string[]; response: string }[] = [
   {
     patterns: ['resume', 'cv', 'curriculum'],
-    response: `**Resume help** is one of our most popular services! Here's what we offer:\n\n- **Resume Review (From RM 150)** — ATS-optimised, with keyword strategy and rewrite suggestions within 3 business days\n- **Starter Launch Package (From RM 320)** — Resume + LinkedIn + 30-min consult bundle\n\nFor a cybersecurity resume, the most important things are: quantified achievements, ATS keywords per role, and clearly articulated technical projects.\n\n👉 Want to get started? [Contact us](/contact?service=resume-review) or [take our quiz](/quiz) to find the right package.`,
+    response: `**Resume help** is one of our most popular services! Here's what we offer:\n\n- **Resume Review (From RM 150)** — ATS-optimised, with keyword strategy and rewrite suggestions within 3 business days\n- **Starter Launch Package (From RM 320)** — Resume + LinkedIn + 30-min consult bundle\n\nFor a cybersecurity resume, the most important things are: quantified achievements, ATS keywords per role, and clearly articulated technical projects.\n\n[Contact us](/contact?service=resume-review) or [take our quiz](/quiz) to find the right package.`,
   },
   {
     patterns: ['linkedin', 'profile', 'recruiter'],
-    response: `**LinkedIn optimisation** is crucial for cybersecurity job hunting. Our **LinkedIn Profile Optimisation service (From RM 120)** covers:\n\n- Keyword-rich headline that ranks in recruiter searches\n- Compelling About section that tells your story\n- Skills section aligned with target roles\n- Moving your profile strength to "All-Star"\n\nMost clients see 3x more recruiter messages within 30 days.\n\n👉 [Enquire about LinkedIn Optimisation](/contact?service=linkedin-optimisation)`,
+    response: `**LinkedIn optimisation** is crucial for cybersecurity job hunting. Our **LinkedIn Profile Optimisation service (From RM 120)** covers:\n\n- Keyword-rich headline that ranks in recruiter searches\n- Compelling About section that tells your story\n- Skills section aligned with target roles\n\nMost clients see 3x more recruiter messages within 30 days.\n\n[Enquire about LinkedIn Optimisation](/contact?service=linkedin-optimisation)`,
   },
   {
     patterns: ['interview', 'mock', 'prepare', 'preparation'],
-    response: `**Interview preparation** is where we see the biggest impact. We offer:\n\n- **Technical Mock Interview (From RM 200)** — Role-specific questions, realistic pressure, detailed written feedback\n- **Behavioural Mock Interview (From RM 180)** — STAR method, salary negotiation scripts, HR question handling\n\nMost clients need 2-3 sessions to feel truly confident. Our **Job-Ready Package (From RM 650)** includes both types plus resume + LinkedIn.\n\n👉 [Book a Mock Interview](/contact?service=mock-interview-technical)`,
+    response: `**Interview preparation** is where we see the biggest impact. We offer:\n\n- **Technical Mock Interview (From RM 200)** — Role-specific questions, realistic pressure, detailed written feedback\n- **Behavioural Mock Interview (From RM 180)** — STAR method, salary negotiation scripts, HR question handling\n\nOur **Job-Ready Package (From RM 650)** includes both types plus resume + LinkedIn.\n\n[Book a Mock Interview](/contact?service=mock-interview-technical)`,
   },
   {
     patterns: ['grc', 'governance', 'risk', 'compliance', 'audit', 'iso 27001', 'pdpa'],
-    response: `**GRC (Governance, Risk & Compliance)** is one of the fastest-growing areas in Malaysian cybersecurity, especially in banking and finance.\n\nOur **GRC Coaching Track (From RM 1,200)** covers:\n- ISO 27001, NIST CSF, PDPA/DPDPA frameworks\n- GRC portfolio with sample risk registers and policies\n- Interview prep for analyst and manager roles\n- Certification guidance (CISA, CRISC, ISO Lead Auditor)\n\nCoached by **Lavanyah Prabu**, who has hands-on GRC experience.\n\n👉 [Explore GRC Track](/services#grc-coaching-track) | [Contact Us](/contact)`,
+    response: `**GRC (Governance, Risk & Compliance)** is one of the fastest-growing areas in Malaysian cybersecurity.\n\nOur **GRC Coaching Track (From RM 1,200)** covers ISO 27001, NIST CSF, PDPA/DPDPA, portfolio building, and interview prep.\n\nCoached by **Lavanyah Prabu**, who has hands-on GRC experience.\n\n[Explore GRC Track](/services) | [Contact Us](/contact)`,
   },
   {
     patterns: ['soc', 'blue team', 'incident response', 'siem', 'splunk', 'threat hunt'],
-    response: `**SOC/Blue Team** roles are the most common entry point into cybersecurity. Our **SOC/Blue Team Track (From RM 1,200)** covers:\n\n- Alert triage methodology and SIEM queries (Splunk/Sentinel/QRadar)\n- Incident response playbook walkthroughs\n- MITRE ATT&CK framework applied to real scenarios\n- Interview prep for Tier 1-3 SOC roles\n- Certification path: Security+ → CySA+ → GCIH\n\n👉 [Explore SOC Track](/services#soc-blue-team-track)`,
+    response: `**SOC/Blue Team** roles are the most common entry point. Our **SOC/Blue Team Track (From RM 1,200)** covers alert triage, SIEM queries, IR playbooks, and interview prep.\n\nCertification path: Security+ → CySA+ → GCIH\n\n[Explore SOC Track](/services)`,
   },
   {
     patterns: ['cloud', 'aws', 'azure', 'gcp', 'cloud security'],
-    response: `**Cloud Security** is the highest-paying cybersecurity specialisation right now. Our **Cloud Security Track (From RM 1,200)** covers:\n\n- Cloud-native security architecture (AWS, Azure, GCP)\n- IAM, CSPM, network security deep-dives\n- Interview preparation for cloud security engineer roles\n- Certification path: AWS SAA → AWS Security Specialty / AZ-500\n\nIn Malaysia, senior cloud security engineers earn RM 12,000–18,000/month.\n\n👉 [Explore Cloud Security Track](/services#cloud-security-track)`,
+    response: `**Cloud Security** is the highest-paying specialisation. Our **Cloud Security Track (From RM 1,200)** covers cloud-native security, IAM, CSPM, and interview prep.\n\nIn Malaysia, senior cloud security engineers earn RM 12,000–18,000/month.\n\n[Explore Cloud Security Track](/services)`,
   },
   {
     patterns: ['salary', 'pay', 'wage', 'earn', 'compensation', 'rm', 'ringgit'],
-    response: `**Malaysian Cybersecurity Salary Benchmarks (2025):**\n\n| Role | Entry | Mid | Senior |\n|------|-------|-----|--------|\n| SOC Analyst | RM 3,500–5,000 | RM 5,000–8,000 | RM 8,000–12,000 |\n| Security Analyst | RM 4,000–6,000 | RM 6,000–10,000 | RM 10,000–15,000 |\n| GRC Analyst | RM 4,500–6,500 | RM 6,500–11,000 | RM 11,000–16,000 |\n| Cloud Security Eng. | RM 7,000–10,000 | RM 10,000–16,000 | RM 16,000–22,000 |\n\nMNCs typically pay 20–40% above local market. Our **Career Consultation** includes salary benchmarking for your target role.\n\n👉 [Book a Consultation](/contact?service=career-consultation-60)`,
+    response: `**Malaysian Cybersecurity Salary Benchmarks (2025):**\n\n| Role | Entry | Mid | Senior |\n|------|-------|-----|--------|\n| SOC Analyst | RM 3,500–5,000 | RM 5,000–8,000 | RM 8,000–12,000 |\n| Security Analyst | RM 4,000–6,000 | RM 6,000–10,000 | RM 10,000–15,000 |\n| GRC Analyst | RM 4,500–6,500 | RM 6,500–11,000 | RM 11,000–16,000 |\n| Cloud Security Eng. | RM 7,000–10,000 | RM 10,000–16,000 | RM 16,000–22,000 |\n\nMNCs typically pay 20–40% above local market.\n\n[Book a Consultation](/contact?service=career-consultation-60)`,
   },
   {
     patterns: ['certification', 'cert', 'comptia', 'cissp', 'ceh', 'oscp', 'study'],
-    response: `**Best cybersecurity certifications by experience level:**\n\n**Entry Level (0-2 years):**\n- CompTIA Security+ — industry standard, widely recognised\n- ISC2 CC (Certified in Cybersecurity) — free to sit, great starter\n- Google Cybersecurity Certificate — good for career switchers\n\n**Mid Level (2-5 years):**\n- CySA+ (Blue Team) / PNPT (Pentest) / CISA (GRC)\n- AWS Security Specialty / AZ-500 (Cloud Security)\n\n**Senior:**\n- CISSP, CISM, CCSP — leadership and architecture roles\n\nOur coaching includes a personalised certification roadmap. 👉 [Download our free cert roadmap](/resources) or [get a consultation](/contact).`,
+    response: `**Best cybersecurity certifications by level:**\n\n**Entry (0-2 years):** CompTIA Security+, ISC2 CC, Google Cybersecurity Certificate\n**Mid (2-5 years):** CySA+, CISA (GRC), AWS Security Specialty\n**Senior:** CISSP, CISM, CCSP\n\nCheck your personalised cert path on our [Career Roadmap](/roadmap) or [get a consultation](/contact).`,
   },
   {
     patterns: ['price', 'cost', 'how much', 'fee', 'package', 'affordable'],
-    response: `**LumaShift Service Pricing:**\n\n| Service | Starting Price |\n|---------|---------------|\n| Resume Review | RM 150 |\n| LinkedIn Optimisation | RM 120 |\n| Career Consultation (30 min) | RM 80 |\n| Career Consultation (60 min) | RM 150 |\n| Mock Interview | RM 180–200 |\n| Starter Launch Package | RM 320 |\n| **Job-Ready Package** ⭐ | **RM 650** |\n| Career Accelerator (4 weeks) | RM 1,800 |\n| Specialist Tracks (GRC/SOC/Cloud) | RM 1,200 |\n\nThe **Job-Ready Package** is our most popular — it bundles resume, LinkedIn, consultation, and 2 mock interviews.\n\n👉 [View all services](/services) | [Contact us](/contact)`,
+    response: `**LumaShift Pricing:**\n\n| Service | From |\n|---------|------|\n| Resume Review | RM 150 |\n| LinkedIn Optimisation | RM 120 |\n| Career Consultation (30 min) | RM 80 |\n| Mock Interview | RM 180–200 |\n| **Job-Ready Package** | **RM 650** |\n| Career Accelerator | RM 1,800 |\n| Specialist Tracks | RM 1,200 |\n\n[View all services](/services) | [Contact us](/contact)`,
   },
   {
     patterns: ['quiz', 'test', 'assess', 'which service', 'right for me', 'recommend'],
-    response: `Not sure which service is right for you? Take our **3-minute Career Quiz** at [/quiz](/quiz) — it gives you:\n\n- A personalised confidence score (0–5)\n- Ranked service recommendations based on your answers\n- Role matches for your background\n- A suggested journey pathway\n\nNo email required to see results. 👉 [Take the Quiz](/quiz)`,
+    response: `Take our **3-minute Career Quiz** at [/quiz](/quiz) — it gives you a personalised confidence score, role recommendations, and service matches.\n\nOr check your [Career Roadmap](/roadmap) for a stage-by-stage progression plan, or run a [Skill Gap Analysis](/skill-gap) to see exactly where you stand.`,
+  },
+  {
+    patterns: ['roadmap', 'path', 'pathway', 'progression', 'what to do next'],
+    response: `Great question! Our **Career Roadmap** at [/roadmap](/roadmap) shows you the exact skills, certifications, and milestones for each stage of your career — personalised to your profile.\n\nCombine it with our [Skill Gap Analysis](/skill-gap) to see exactly which skills you need to develop.\n\nIf you want a human expert to walk you through it, book a [Career Consultation](/contact).`,
+  },
+  {
+    patterns: ['skill', 'gap', 'missing', 'need to learn', 'weak'],
+    response: `Check your personalised **Skill Gap Analysis** at [/skill-gap](/skill-gap) — it shows a radar chart of your skills vs. role requirements, a readiness score, and prioritised gaps to close.\n\nIf you haven't set up your profile yet, [complete it here](/profile) to get accurate results.`,
   },
   {
     patterns: ['contact', 'reach', 'email', 'talk', 'speak', 'call', 'book'],
-    response: `**Get in touch with LumaShift:**\n\n📧 **Email:** [lumashift@outlook.com](mailto:lumashift@outlook.com)\n⏱ **Response time:** Within 24 hours on business days\n📍 **Sessions via:** Google Meet or Zoom\n🌍 **Coverage:** Malaysia + Global\n\nWe don't do high-pressure sales. You'll get an honest assessment of your situation and a clear recommendation.\n\n👉 [Send us a message](/contact)`,
+    response: `**Get in touch with LumaShift:**\n\nEmail: lumashift@outlook.com\nResponse time: Within 24 hours\nSessions via Google Meet or Zoom\n\n[Send us a message](/contact)`,
   },
   {
-    patterns: ['team', 'mukesh', 'lavanyah', 'founder', 'coach', 'who'],
-    response: `**The LumaShift Team:**\n\n**Mukesh Vijaian** — Co-Founder & Lead Career Coach\nExpertise: SOC, Cloud Security, Threat Intelligence, Technical Interview Coaching\n🔗 [LinkedIn](https://www.linkedin.com/in/mukeshvijaian/)\n\n**Lavanyah Prabu** — Co-Founder & Career Strategy Coach\nExpertise: GRC, Risk Management, Soft Skills, Career Transitions\n🔗 [LinkedIn](https://www.linkedin.com/in/lavanyahprabu/)\n\nWhen you work with LumaShift, you work directly with the co-founders — no junior consultants.\n\n👉 [Meet the team](/team)`,
+    patterns: ['fresh grad', 'student', 'entry level', 'beginner', 'start', 'no experience'],
+    response: `**For fresh grads:**\n\n1. **Resume** — Get it ATS-optimised (Resume Review, RM 150)\n2. **LinkedIn** — 70% of interviews come from recruiter searches\n3. **Certs** — CompTIA Security+ or ISC2 CC as a starter\n4. **Direction** — Our [Career Quiz](/quiz) helps you pick the right path\n\nOur **Starter Launch Package (RM 320)** is the ideal first step.\n\n[View your Career Roadmap](/roadmap) for a step-by-step plan.`,
   },
   {
-    patterns: ['fresh grad', 'student', 'entry level', 'beginner', 'start', 'no experience', 'zero experience'],
-    response: `**For fresh grads and students, here's the honest path:**\n\n1. **Get your resume right first** — most entry-level resumes are badly structured for ATS systems. Start with a Resume Review.\n\n2. **LinkedIn matters more than you think** — 70% of our client's interviews come from recruiters finding them on LinkedIn, not from job applications.\n\n3. **Certs help, but aren't everything** — CompTIA Security+ or ISC2 CC are good for entry-level. Don't cert-chase without a plan.\n\n4. **Our Starter Launch Package (RM 320)** bundles resume + LinkedIn + career direction consultation — ideal starting point.\n\n👉 [Explore the Starter Package](/services#starter-launch-package) | [Take the Quiz](/quiz)`,
-  },
-  {
-    patterns: ['career change', 'switch', 'transition', 'different field', 'non-it', 'not technical'],
-    response: `**Career switching into cybersecurity is very doable — but it needs strategy.**\n\nThe key is positioning your existing experience correctly:\n- Finance/accounting background → GRC, risk management roles\n- Engineering background → OT/ICS security, or cloud security\n- Legal/compliance background → GRC, DPO, privacy roles\n- IT support/helpdesk → SOC analyst, security analyst\n\nDon't start from scratch — leverage what you already have.\n\nOur coaches have helped many career changers navigate this. A **Career Consultation (RM 80–150)** is usually the best first step.\n\n👉 [Book a Consultation](/contact?service=career-consultation-30)`,
+    patterns: ['career change', 'switch', 'transition', 'different field', 'non-it'],
+    response: `**Career switching into cybersecurity:**\n\n- Finance/accounting → GRC, risk management\n- Engineering → OT/ICS security, cloud security\n- Legal/compliance → GRC, DPO, privacy\n- IT support → SOC analyst, security analyst\n\nDon't start from scratch — leverage what you have. A **Career Consultation (RM 80–150)** is the best first step.\n\n[Book a Consultation](/contact?service=career-consultation-30)`,
   },
 ];
 
@@ -108,7 +180,7 @@ function getRuleBasedResponse(message: string): string {
       return rule.response;
     }
   }
-  return `Thanks for reaching out! I'm LumaShift's career assistant.\n\nI can help you with:\n- 🎯 **Which service is right for you**\n- 💼 **Career paths in cybersecurity** (SOC, GRC, Cloud, OT/ICS)\n- 📜 **Certification guidance**\n- 💰 **Malaysian salary benchmarks**\n- 📄 **Resume and LinkedIn tips**\n- 👥 **About our team and services**\n\nOr take our **[3-minute Career Quiz](/quiz)** for a personalised recommendation.\n\nFor complex questions, email us directly at **lumashift@outlook.com** — we respond within 24 hours.`;
+  return `I can help you with:\n\n- **Which service fits you** — or take our [Career Quiz](/quiz)\n- **Career paths** — SOC, GRC, Cloud, OT/ICS\n- **Certification guidance** — personalised to your level\n- **Salary benchmarks** — Malaysia + global\n- **Your roadmap** — [Career Roadmap](/roadmap) | [Skill Gap Analysis](/skill-gap)\n\nFor personalised advice, [complete your profile](/profile) and I'll tailor my guidance to your situation.\n\nFor detailed questions, email us at **lumashift@outlook.com**.`;
 }
 
 export async function POST(req: NextRequest) {
@@ -118,15 +190,34 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
-    // ── WITH ANTHROPIC API ────────────────────────────────────────────────────
+    // Fetch user profile for context-aware responses
+    let userContext = '';
+    try {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const [profileRes, quizRes] = await Promise.all([
+          supabase.from('profiles').select('*').eq('id', user.id).single(),
+          supabase.from('quiz_results').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1),
+        ]);
+        userContext = buildUserContext(profileRes.data, quizRes.data?.[0] ?? null);
+      } else {
+        userContext = buildUserContext(null, null);
+      }
+    } catch {
+      // If profile fetch fails, continue without user context
+      userContext = '';
+    }
+
     if (apiKey) {
       const Anthropic = (await import('@anthropic-ai/sdk')).default;
       const client = new Anthropic({ apiKey });
 
       const stream = await client.messages.stream({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 600,
-        system: LUMASHIFT_CONTEXT,
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        system: LUMASHIFT_CONTEXT + '\n\n' + ADVISOR_INSTRUCTIONS + userContext,
         messages: messages.map((m: { role: string; content: string }) => ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
@@ -153,14 +244,14 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // ── RULE-BASED FALLBACK ───────────────────────────────────────────────────
+    // Rule-based fallback
     const response = getRuleBasedResponse(lastMessage);
     return NextResponse.json({ response });
   } catch (err) {
     console.error('[Chat API]', err);
     return NextResponse.json(
       { response: 'Sorry, something went wrong. Please email lumashift@outlook.com directly.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

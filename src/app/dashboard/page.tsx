@@ -2,18 +2,72 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import {
   User, BookOpen, FileText, Trophy, Zap, BarChart2, Clock, ChevronRight,
-  CheckCircle, Star, Shield, Bookmark, Briefcase, Target
+  CheckCircle, Star, Shield, Bookmark, Briefcase, Target, Sparkles,
+  UserCircle, ClipboardCheck, MessageSquare, Phone, Map, BarChart3,
+  Linkedin, TrendingUp, ArrowRight, ExternalLink
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { computeProfileCompletion } from '@/lib/profile-completion';
 import { BADGES } from '@/lib/gamification';
-import { formatDate } from '@/lib/utils';
+import { formatDate, cn } from '@/lib/utils';
+import { generateRecommendations } from '@/lib/recommendations';
+import type { RecommendationInput, NextAction } from '@/lib/recommendations';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
   description: 'Your LumaShift career dashboard',
 };
+
+/* ─── Icon Resolver ────────────────────────────────────────────────────────── */
+
+const ICON_MAP: Record<string, React.ReactNode> = {
+  UserCircle:     <UserCircle size={14} />,
+  ClipboardCheck: <ClipboardCheck size={14} />,
+  FileText:       <FileText size={14} />,
+  MessageSquare:  <MessageSquare size={14} />,
+  Linkedin:       <Linkedin size={14} />,
+  Phone:          <Phone size={14} />,
+  BookOpen:       <BookOpen size={14} />,
+  Map:            <Map size={14} />,
+  BarChart3:      <BarChart3 size={14} />,
+  Bookmark:       <Bookmark size={14} />,
+};
+
+function getActionIcon(iconName: string): React.ReactNode {
+  return ICON_MAP[iconName] ?? <Zap size={14} />;
+}
+
+/* ─── Priority Badge ───────────────────────────────────────────────────────── */
+
+function PriorityBadge({ priority }: { priority: NextAction['priority'] }) {
+  const styles = {
+    urgent: 'bg-red-100 dark:bg-red-500/15 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/20',
+    high:   'bg-orange-100 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-500/20',
+    medium: 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-600',
+  };
+  return (
+    <span className={cn('text-[10px] px-1.5 py-0.5 rounded-full font-semibold border uppercase tracking-wider', styles[priority])}>
+      {priority}
+    </span>
+  );
+}
+
+/* ─── Match Score Badge ────────────────────────────────────────────────────── */
+
+function MatchBadge({ score }: { score: number }) {
+  const color =
+    score >= 70 ? 'bg-green-100 dark:bg-green-500/15 text-green-600 dark:text-green-400 border-green-200 dark:border-green-500/20' :
+    score >= 40 ? 'bg-orange-100 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-500/20' :
+                  'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-600';
+  return (
+    <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-bold border tabular-nums', color)}>
+      {score}% match
+    </span>
+  );
+}
+
+/* ─── Main Page ────────────────────────────────────────────────────────────── */
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -51,23 +105,40 @@ export default async function DashboardPage() {
   const savedBlogs = savedItems.filter((s) => s.item_type === 'blog_post');
   const savedResources = savedItems.filter((s) => s.item_type === 'resource');
 
-  // Next action suggestions
-  const suggestions: { text: string; href: string; icon: React.ReactNode }[] = [];
-  if (completion.score < 70) {
-    suggestions.push({ text: 'Complete your profile to unlock Career Ready', href: '/profile', icon: <User size={14} /> });
-  }
-  if (!latestQuiz) {
-    suggestions.push({ text: 'Take the Cyber Confidence Quiz', href: '/quiz', icon: <BarChart2 size={14} /> });
-  }
-  if (savedBlogs.length === 0) {
-    suggestions.push({ text: 'Read and save a blog post', href: '/blog', icon: <BookOpen size={14} /> });
-  }
-  if (savedResources.length < 3) {
-    suggestions.push({ text: 'Save 3 resources to earn Resource Collector', href: '/resources', icon: <Bookmark size={14} /> });
-  }
-  if (activities.filter((a) => a.event_type === 'role_explored').length < 3) {
-    suggestions.push({ text: 'Explore 3 career roles for Career Explorer badge', href: '/career/security-analyst', icon: <Target size={14} /> });
-  }
+  // ─── Generate Smart Recommendations ─────────────────────────────────────
+  const readBlogSlugs = activities
+    .filter((a) => a.event_type === 'blog_read' && a.item_id)
+    .map((a) => a.item_id as string);
+
+  const recommendationInput: RecommendationInput = {
+    profile: profile
+      ? {
+          career_stage: profile.career_stage ?? null,
+          target_roles: (profile.target_roles as string[]) ?? [],
+          current_skills: (profile.current_skills as string[]) ?? [],
+          years_experience: profile.years_experience ?? null,
+          certifications_obtained: (profile.certifications_obtained as string[]) ?? [],
+          certifications_planned: (profile.certifications_planned as string[]) ?? [],
+          job_role: profile.job_role ?? null,
+        }
+      : null,
+    quizResult: latestQuiz
+      ? {
+          confidence_score: latestQuiz.confidence_score as number,
+          recommended_roles: (latestQuiz.recommended_roles as string[]) ?? [],
+          recommended_services: (latestQuiz.recommended_services as string[]) ?? [],
+          strengths: (latestQuiz.strengths as string[]) ?? [],
+          gaps: (latestQuiz.gaps as string[]) ?? [],
+          talk_to_coach: latestQuiz.talk_to_coach as boolean,
+        }
+      : null,
+    profileScore: completion.score,
+    activitiesCompleted: activities.map((a) => a.event_type as string),
+    savedItemIds: savedItems.map((s) => s.item_id as string),
+    readBlogSlugs,
+  };
+
+  const recommendations = generateRecommendations(recommendationInput);
 
   const completionColor =
     completion.score >= 70 ? 'bg-green-500' :
@@ -147,7 +218,7 @@ export default async function DashboardPage() {
                 <h2 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <User size={18} className="text-orange-500" /> Profile Completion
                 </h2>
-                <span className="text-sm font-bold text-orange-500">{completion.score}% — {completion.label}</span>
+                <span className="text-sm font-bold text-orange-500">{completion.score}% &mdash; {completion.label}</span>
               </div>
               <div className="bg-gray-100 dark:bg-gray-800 rounded-full h-3 mb-4">
                 <div
@@ -168,6 +239,116 @@ export default async function DashboardPage() {
                 Complete your profile <ChevronRight size={14} />
               </Link>
             </div>
+
+            {/* Recommended For You — Services */}
+            {recommendations.services.length > 0 && (
+              <div className="card">
+                <h2 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Sparkles size={18} className="text-orange-500" /> Recommended Services
+                </h2>
+                <div className="grid sm:grid-cols-3 gap-3">
+                  {recommendations.services.map((svc) => (
+                    <Link
+                      key={svc.serviceId}
+                      href="/services"
+                      className="group flex flex-col p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-[#1A1A1A] hover:border-orange-300 dark:hover:border-orange-700 transition-all"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{svc.tier}</span>
+                        <MatchBadge score={svc.matchScore} />
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-orange-500 transition-colors mb-1 leading-tight">
+                        {svc.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 leading-relaxed flex-1">
+                        {svc.reason}
+                      </p>
+                      <div className="flex items-center justify-between mt-auto">
+                        <span className="text-xs font-bold text-orange-500">{svc.price}</span>
+                        <ArrowRight size={13} className="text-gray-300 dark:text-gray-600 group-hover:text-orange-500 transition-colors" />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recommended Content */}
+            {recommendations.content.length > 0 && (
+              <div className="card">
+                <h2 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <BookOpen size={18} className="text-orange-500" /> Recommended Content
+                </h2>
+                <div className="space-y-2">
+                  {recommendations.content.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={item.type === 'blog' ? `/blog/${item.id}` : '/resources'}
+                      className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-orange-300 dark:hover:border-orange-700 transition-all group"
+                    >
+                      <div className={cn(
+                        'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
+                        item.type === 'blog'
+                          ? 'bg-orange-100 dark:bg-orange-500/10'
+                          : 'bg-blue-100 dark:bg-blue-500/10'
+                      )}>
+                        {item.type === 'blog'
+                          ? <FileText size={14} className="text-orange-500" />
+                          : <Bookmark size={14} className="text-blue-500" />
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className={cn(
+                            'text-[10px] font-semibold uppercase tracking-wider',
+                            item.type === 'blog' ? 'text-orange-500' : 'text-blue-500'
+                          )}>
+                            {item.type}
+                          </span>
+                          <MatchBadge score={item.relevanceScore} />
+                        </div>
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-orange-500 transition-colors truncate">
+                          {item.title}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate">{item.reason}</p>
+                      </div>
+                      <ExternalLink size={13} className="text-gray-300 dark:text-gray-600 shrink-0" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recommended Roles */}
+            {recommendations.roles.length > 0 && (
+              <div className="card">
+                <h2 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Target size={18} className="text-orange-500" /> Roles For You
+                </h2>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {recommendations.roles.map((role) => (
+                    <Link
+                      key={role.roleId}
+                      href={`/career/${role.roleId}`}
+                      className="group flex flex-col p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-[#1A1A1A] hover:border-orange-300 dark:hover:border-orange-700 transition-all"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-orange-500 transition-colors">
+                          {role.title}
+                        </h3>
+                        <MatchBadge score={role.fitScore} />
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed flex-1">
+                        {role.matchReason}
+                      </p>
+                      <div className="flex items-center gap-1 mt-3 text-xs font-semibold text-orange-500">
+                        View role details <ArrowRight size={12} />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Quiz Results */}
             {latestQuiz && (
@@ -214,7 +395,7 @@ export default async function DashboardPage() {
                   <p className="text-sm text-gray-500 dark:text-gray-400">No saved items yet.</p>
                   <div className="flex gap-2 justify-center mt-3">
                     <Link href="/blog" className="text-xs text-orange-500 hover:underline">Browse Blog</Link>
-                    <span className="text-gray-300">·</span>
+                    <span className="text-gray-300">&middot;</span>
                     <Link href="/resources" className="text-xs text-orange-500 hover:underline">Browse Resources</Link>
                   </div>
                 </div>
@@ -326,26 +507,32 @@ export default async function DashboardPage() {
 
           {/* Right Column */}
           <div className="space-y-6">
-            {/* Next Actions */}
-            {suggestions.length > 0 && (
+            {/* Smart Next Actions */}
+            {recommendations.nextActions.length > 0 && (
               <div className="card border-orange-200 dark:border-orange-500/20 bg-orange-50/50 dark:bg-orange-500/5">
                 <h2 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Zap size={18} className="text-orange-500" /> Next Actions
                 </h2>
                 <div className="space-y-2.5">
-                  {suggestions.slice(0, 4).map((s, i) => (
+                  {recommendations.nextActions.map((action) => (
                     <Link
-                      key={i}
-                      href={s.href}
-                      className="flex items-center gap-3 p-3 bg-white dark:bg-[#1E1E1E] rounded-xl border border-gray-100 dark:border-gray-800 hover:border-orange-300 dark:hover:border-orange-700 transition-all group"
+                      key={action.id}
+                      href={action.href}
+                      className="flex items-start gap-3 p-3 bg-white dark:bg-[#1E1E1E] rounded-xl border border-gray-100 dark:border-gray-800 hover:border-orange-300 dark:hover:border-orange-700 transition-all group"
                     >
-                      <div className="w-7 h-7 bg-orange-100 dark:bg-orange-500/10 rounded-lg flex items-center justify-center text-orange-500 shrink-0">
-                        {s.icon}
+                      <div className="w-7 h-7 bg-orange-100 dark:bg-orange-500/10 rounded-lg flex items-center justify-center text-orange-500 shrink-0 mt-0.5">
+                        {getActionIcon(action.icon)}
                       </div>
-                      <span className="text-sm text-gray-700 dark:text-gray-200 group-hover:text-orange-500 transition-colors flex-1 leading-tight">
-                        {s.text}
-                      </span>
-                      <ChevronRight size={13} className="text-gray-300 dark:text-gray-600 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 group-hover:text-orange-500 transition-colors leading-tight">
+                            {action.title}
+                          </span>
+                          <PriorityBadge priority={action.priority} />
+                        </div>
+                        <p className="text-xs text-gray-400 leading-relaxed">{action.description}</p>
+                      </div>
+                      <ChevronRight size={13} className="text-gray-300 dark:text-gray-600 shrink-0 mt-1" />
                     </Link>
                   ))}
                 </div>

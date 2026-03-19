@@ -13,6 +13,7 @@ import {
   Minimize2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Message {
   id: string;
@@ -20,11 +21,18 @@ interface Message {
   content: string;
 }
 
-const SUGGESTED_QUESTIONS = [
+const GUEST_QUESTIONS = [
   'Which service is right for me?',
   'What certifications should I get?',
   'How much do cybersecurity roles pay in Malaysia?',
   'I want to switch into cybersecurity',
+];
+
+const LOGGED_IN_QUESTIONS = [
+  'What should I focus on next?',
+  'Analyze my skill gaps',
+  'Which certification should I pursue?',
+  'Help me plan my career roadmap',
 ];
 
 // Lightweight markdown renderer for chat messages
@@ -62,14 +70,19 @@ function renderChatMarkdown(text: string) {
 }
 
 export function ChatBot() {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [minimised, setMinimised] = useState(false);
+
+  const suggestedQuestions = user ? LOGGED_IN_QUESTIONS : GUEST_QUESTIONS;
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '0',
       role: 'assistant',
-      content:
-        "Hi! I'm LumaShift's career assistant. I can help you find the right coaching service, understand cybersecurity career paths, or answer questions about certifications and salaries.\n\nWhat can I help you with today?",
+      content: user
+        ? "Hi! I'm your LumaShift Career Advisor. I have access to your profile and can give you personalised guidance on your cybersecurity career.\n\nAsk me about your next steps, skill gaps, certifications, or anything career-related."
+        : "Hi! I'm LumaShift's Career Advisor. I can help you find the right coaching service, understand cybersecurity career paths, or answer questions about certifications and salaries.\n\nWhat can I help you with today?",
     },
   ]);
   const [input, setInput] = useState('');
@@ -197,8 +210,8 @@ export function ChatBot() {
             <Bot size={20} className="text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-white">LumaShift Assistant</p>
-            <p className="text-xs text-orange-100">Cybersecurity career guidance</p>
+            <p className="text-sm font-bold text-white">LumaShift Career Advisor</p>
+            <p className="text-xs text-orange-100">{user ? 'Personalised career guidance' : 'Cybersecurity career guidance'}</p>
           </div>
           <div className="flex items-center gap-1">
             <button
@@ -288,7 +301,7 @@ export function ChatBot() {
               <div className="px-4 pb-2">
                 <p className="text-xs text-gray-400 mb-2">Quick questions:</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {SUGGESTED_QUESTIONS.map((q) => (
+                  {suggestedQuestions.map((q) => (
                     <button
                       key={q}
                       onClick={() => sendMessage(q)}

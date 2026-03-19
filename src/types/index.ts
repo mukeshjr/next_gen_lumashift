@@ -179,3 +179,46 @@ export interface ServiceInterest {
   metadata: Record<string, unknown>;
   created_at: string;
 }
+
+// ─── Career Roadmap Types ─────────────────────────────────────────────────────
+
+export interface PathwayMilestone {
+  title: string;
+  description: string;
+}
+
+export interface PathwayStage {
+  id: string;
+  name: string;
+  description: string;
+  timeframe: string;
+  skills: string[];
+  certifications: string[];
+  milestones: PathwayMilestone[];
+  recommendedServices: string[];
+}
+
+export interface CareerPathway {
+  roleId: string;
+  stages: PathwayStage[];
+}
+
+export interface SkillGap {
+  skill: string;
+  current: number;   // 0-100
+  required: number;   // 0-100
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  category: string;
+}
+
+export interface ReadinessAssessment {
+  overallScore: number;
+  profileCompleteness: number;
+  quizConfidence: number;
+  skillsCoverage: number;
+  certProgress: number;
+  activityEngagement: number;
+  resourceConsumption: number;
+  label: string;
+  nextMilestone: string;
+}

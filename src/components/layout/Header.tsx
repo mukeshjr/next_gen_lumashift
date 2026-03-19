@@ -25,6 +25,9 @@ const PUBLIC_NAV = [
     children: [
       { href: '/quiz', label: 'Career Quiz' },
       { href: '/compare-roles', label: 'Compare Roles' },
+      { href: '/roadmap', label: 'Career Roadmap' },
+      { href: '/skill-gap', label: 'Skill Gap Analysis' },
+      { href: '/achievements', label: 'Achievements' },
     ],
   },
   { href: '/contact', label: 'Contact' },

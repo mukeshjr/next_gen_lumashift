@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -169,4 +169,76 @@
 
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ── Cyber Grid Background ── */
+  .cyber-grid {
+    background-image:
+      linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .dark .cyber-grid {
+    background-image:
+      linear-gradient(rgba(6, 182, 212, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(6, 182, 212, 0.06) 1px, transparent 1px);
+  }
+
+  /* ── Roadmap connector line ── */
+  .roadmap-line {
+    background: linear-gradient(180deg, #F97316 0%, #06B6D4 100%);
+  }
+
+  /* ── Glow effects ── */
+  .glow-orange {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.15), 0 0 60px rgba(249, 115, 22, 0.05);
+  }
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.15), 0 0 60px rgba(6, 182, 212, 0.05);
+  }
+  .dark .glow-orange {
+    box-shadow: 0 0 30px rgba(249, 115, 22, 0.2), 0 0 80px rgba(249, 115, 22, 0.08);
+  }
+  .dark .glow-cyan {
+    box-shadow: 0 0 30px rgba(6, 182, 212, 0.2), 0 0 80px rgba(6, 182, 212, 0.08);
+  }
+
+  /* ── Stage card active pulse ── */
+  @keyframes pulse-border {
+    0%, 100% { border-color: rgba(249, 115, 22, 0.4); }
+    50% { border-color: rgba(249, 115, 22, 0.8); }
+  }
+  .stage-active {
+    animation: pulse-border 2s ease-in-out infinite;
+  }
+
+  /* ── Gradient text (cyan variant) ── */
+  .gradient-text-cyan {
+    @apply bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent;
+  }
+
+  /* ── Stagger animation delays ── */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+
+  /* ── Radar chart ── */
+  @keyframes radar-fill {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .radar-animate {
+    animation: radar-fill 0.8s ease-out forwards;
+  }
+
+  /* ── Progress bar shimmer ── */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .progress-shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
 }

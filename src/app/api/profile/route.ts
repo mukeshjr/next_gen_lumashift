@@ -74,13 +74,21 @@ export async function PUT(req: NextRequest) {
       .eq('user_id', user.id);
 
     const logs = activityCounts ?? [];
+    const savedCount = (savedCounts ?? []).length;
     const ctx = {
       profileScore: score,
       rolesExplored: logs.filter((l) => l.event_type === 'role_explored').length,
       blogsRead: logs.filter((l) => l.event_type === 'blog_read').length,
       quizzesTaken: (quizCounts ?? []).length,
       rolesCompared: logs.filter((l) => l.event_type === 'roles_compared').length,
-      resourcesSaved: (savedCounts ?? []).length,
+      resourcesSaved: savedCount,
+      servicesViewed: logs.filter((l) => l.event_type === 'service_viewed').length,
+      roadmapViewed: logs.some((l) => l.event_type === 'roadmap_viewed'),
+      skillGapViewed: logs.some((l) => l.event_type === 'skill_gap_viewed'),
+      hasSavedItem: savedCount > 0,
+      hasCertPlanned: (profile?.certifications_planned?.length ?? 0) > 0,
+      profileComplete: score >= 100,
+      streakDays: 0, // Streak calculation is handled separately
     };
 
     const earned = checkEarnedBadges(ctx);
