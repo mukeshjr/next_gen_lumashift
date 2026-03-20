@@ -9,7 +9,7 @@ LumaShift is a cybersecurity career coaching platform for Malaysian and global p
 - **Framework**: Next.js (App Router), React 18, TypeScript
 - **Styling**: Tailwind CSS v3 with `@tailwindcss/typography`, `next-themes` for dark mode
 - **Backend**: Next.js API routes, Supabase (auth + database)
-- **AI**: Anthropic SDK (`@anthropic-ai/sdk`) for the chatbot
+- **AI**: Groq SDK (`groq-sdk`) with Llama 3.3 70B for chatbot, plan generator, and blog generator
 - **Forms**: Contact/resource forms submit to Google Sheets via a Google Apps Script webhook
 - **Utilities**: `clsx`, `tailwind-merge` (via `src/lib/utils.ts`), `lucide-react` icons
 
@@ -76,7 +76,7 @@ supabase/            # Supabase local config
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 NEXT_PUBLIC_GOOGLE_SCRIPT_URL   # Google Apps Script webhook URL for contact/resource forms
-ANTHROPIC_API_KEY               # For the AI chatbot (/api/chat)
+GROQ_API_KEY                    # For AI features (chatbot, plan generator, blog generator)
 ```
 
 Without `NEXT_PUBLIC_GOOGLE_SCRIPT_URL`, contact form submissions are logged to the console and return `{ success: true, dev: true }` — safe for local dev.

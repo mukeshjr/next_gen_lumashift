@@ -305,8 +305,8 @@ export async function POST(req: NextRequest) {
     const profile = profileRes.data;
     const quizResult = quizRes.data?.[0] ?? null;
 
-    // Check for Anthropic API key
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    // Check for Groq API key
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
       // Fallback: return a template plan from career pathway data
@@ -316,17 +316,20 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Build prompt and call Claude
+    // Build prompt and call Groq
     const userPrompt = buildUserPrompt(profile, quizResult, targetRole, timeCommitment, budget);
 
-    const Anthropic = (await import('@anthropic-ai/sdk')).default;
-    const client = new Anthropic({ apiKey });
+    const Groq = (await import('groq-sdk')).default;
+    const client = new Groq({ apiKey });
 
-    const stream = await client.messages.stream({
-      model: 'claude-sonnet-4-20250514',
+    const stream = await client.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
       max_tokens: 2500,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userPrompt }],
+      stream: true,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userPrompt },
+      ],
     });
 
     // Stream the response as text/plain
@@ -335,11 +338,9 @@ export async function POST(req: NextRequest) {
       async start(controller) {
         try {
           for await (const chunk of stream) {
-            if (
-              chunk.type === 'content_block_delta' &&
-              chunk.delta.type === 'text_delta'
-            ) {
-              controller.enqueue(encoder.encode(chunk.delta.text));
+            const text = chunk.choices[0]?.delta?.content;
+            if (text) {
+              controller.enqueue(encoder.encode(text));
             }
           }
           controller.close();

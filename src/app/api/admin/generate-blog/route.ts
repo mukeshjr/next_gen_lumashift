@@ -55,7 +55,7 @@ interface GeneratedBlogData {
 export async function POST(req: NextRequest) {
   try {
     // Check for API key first
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
         { error: 'AI generation not available' },
@@ -98,20 +98,22 @@ export async function POST(req: NextRequest) {
       userPrompt += `\nPreferred category: ${categoryHint}`;
     }
 
-    // Call Claude to generate the blog post
-    const Anthropic = (await import('@anthropic-ai/sdk')).default;
-    const client = new Anthropic({ apiKey });
+    // Call Groq to generate the blog post
+    const Groq = (await import('groq-sdk')).default;
+    const client = new Groq({ apiKey });
 
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+    const completion = await client.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
       max_tokens: 4096,
-      system: BLOG_GENERATOR_SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userPrompt }],
+      messages: [
+        { role: 'system', content: BLOG_GENERATOR_SYSTEM_PROMPT },
+        { role: 'user', content: userPrompt },
+      ],
     });
 
     // Extract text from the response
-    const textBlock = message.content.find((block) => block.type === 'text');
-    if (!textBlock || textBlock.type !== 'text') {
+    const responseText = completion.choices[0]?.message?.content;
+    if (!responseText) {
       return NextResponse.json(
         { error: 'AI did not return a text response' },
         { status: 500 }
@@ -122,14 +124,14 @@ export async function POST(req: NextRequest) {
     let generated: GeneratedBlogData;
     try {
       // Strip markdown code fences if present (safety measure)
-      let raw = textBlock.text.trim();
+      let raw = responseText.trim();
       if (raw.startsWith('```')) {
         raw = raw.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
       }
       generated = JSON.parse(raw);
     } catch (parseError) {
       console.error('[Generate Blog] Failed to parse AI response:', parseError);
-      console.error('[Generate Blog] Raw response:', textBlock.text);
+      console.error('[Generate Blog] Raw response:', responseText);
       return NextResponse.json(
         { error: 'Failed to parse AI-generated content. Please try again.' },
         { status: 500 }

@@ -188,7 +188,7 @@ export async function POST(req: NextRequest) {
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1]?.content ?? '';
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     // Fetch user profile for context-aware responses
     let userContext = '';
@@ -211,28 +211,29 @@ export async function POST(req: NextRequest) {
     }
 
     if (apiKey) {
-      const Anthropic = (await import('@anthropic-ai/sdk')).default;
-      const client = new Anthropic({ apiKey });
+      const Groq = (await import('groq-sdk')).default;
+      const client = new Groq({ apiKey });
 
-      const stream = await client.messages.stream({
-        model: 'claude-sonnet-4-20250514',
+      const stream = await client.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
         max_tokens: 800,
-        system: LUMASHIFT_CONTEXT + '\n\n' + ADVISOR_INSTRUCTIONS + userContext,
-        messages: messages.map((m: { role: string; content: string }) => ({
-          role: m.role as 'user' | 'assistant',
-          content: m.content,
-        })),
+        stream: true,
+        messages: [
+          { role: 'system', content: LUMASHIFT_CONTEXT + '\n\n' + ADVISOR_INSTRUCTIONS + userContext },
+          ...messages.map((m: { role: string; content: string }) => ({
+            role: m.role as 'user' | 'assistant',
+            content: m.content,
+          })),
+        ],
       });
 
       const encoder = new TextEncoder();
       const readable = new ReadableStream({
         async start(controller) {
           for await (const chunk of stream) {
-            if (
-              chunk.type === 'content_block_delta' &&
-              chunk.delta.type === 'text_delta'
-            ) {
-              controller.enqueue(encoder.encode(chunk.delta.text));
+            const text = chunk.choices[0]?.delta?.content;
+            if (text) {
+              controller.enqueue(encoder.encode(text));
             }
           }
           controller.close();
