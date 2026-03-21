@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Search, Tag, X, BookOpen } from 'lucide-react';
 import { BlogCard } from './BlogCard';
+import { Button } from '@/components/ui/button';
 import type { BlogPost } from '@/types';
 
 interface BlogFilterProps {
@@ -145,9 +146,9 @@ export function BlogFilter({ posts, categories, tags }: BlogFilterProps) {
           <p className="text-gray-500 dark:text-gray-400 mb-6">
             Try a different search term or clear your filters.
           </p>
-          <button onClick={clearFilters} className="btn-secondary">
+          <Button onClick={clearFilters} variant="brandOutline" size="brand-default">
             Clear Filters
-          </button>
+          </Button>
         </div>
       )}
     </div>

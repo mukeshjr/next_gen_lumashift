@@ -16,8 +16,8 @@ export default async function BlogPage() {
   ]);
 
   return (
-    <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
-      <section className="py-20 bg-gray-50 dark:bg-[#141414] border-b border-gray-100 dark:border-gray-800">
+    <div className="bg-background min-h-screen">
+      <section className="py-20 bg-muted border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="section-tag mx-auto w-fit">Blog</span>
           <h1 className="section-title mt-4">Cybersecurity Career Insights</h1>
@@ -26,9 +26,9 @@ export default async function BlogPage() {
             career paths, and what it actually takes to succeed.
           </p>
           <div className="flex flex-wrap justify-center gap-6 mt-8">
-            <span className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 font-medium">✍️ {posts.length} articles published</span>
-            <span className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 font-medium">🎯 Malaysia + Global market</span>
-            <span className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 font-medium">🔄 Updated regularly</span>
+            <span className="flex items-center gap-2 text-sm text-muted-foreground font-medium">✍️ {posts.length} articles published</span>
+            <span className="flex items-center gap-2 text-sm text-muted-foreground font-medium">🎯 Malaysia + Global market</span>
+            <span className="flex items-center gap-2 text-sm text-muted-foreground font-medium">🔄 Updated regularly</span>
           </div>
         </div>
       </section>

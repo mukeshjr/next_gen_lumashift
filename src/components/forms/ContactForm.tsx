@@ -2,6 +2,8 @@
 
 import { useState, FormEvent } from 'react';
 import { Send, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ContactFormProps {
   serviceId?: string;
@@ -49,21 +51,25 @@ export function ContactForm({ serviceId, title }: ContactFormProps) {
 
   if (status === 'success') {
     return (
-      <div className="card text-center py-12">
-        <CheckCircle size={52} className="text-green-500 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-          Message Received!
-        </h3>
-        <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
-          We&apos;ll get back to you within 24 hours. Check your inbox — we might have a few questions.
-        </p>
-        <button
-          onClick={() => setStatus('idle')}
-          className="mt-6 btn-secondary"
-        >
-          Send Another Message
-        </button>
-      </div>
+      <Card className="text-center py-12">
+        <CardContent>
+          <CheckCircle size={52} className="text-green-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-foreground mb-2">
+            Message Received!
+          </h3>
+          <p className="text-muted-foreground max-w-sm mx-auto">
+            We&apos;ll get back to you within 24 hours. Check your inbox — we might have a few questions.
+          </p>
+          <Button
+            onClick={() => setStatus('idle')}
+            variant="brandOutline"
+            size="brand-default"
+            className="mt-6"
+          >
+            Send Another Message
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -132,10 +138,12 @@ export function ContactForm({ serviceId, title }: ContactFormProps) {
         </div>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={status === 'loading'}
-        className="btn-primary w-full justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+        variant="brand"
+        size="brand-default"
+        className="w-full justify-center disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {status === 'loading' ? (
           <>
@@ -146,7 +154,7 @@ export function ContactForm({ serviceId, title }: ContactFormProps) {
             <Send size={16} /> Send Message
           </>
         )}
-      </button>
+      </Button>
 
       <p className="text-xs text-center text-gray-400">
         We typically respond within 24 hours. Or email us directly at{' '}

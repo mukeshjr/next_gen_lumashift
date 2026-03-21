@@ -7,6 +7,9 @@ import { getPostBySlug } from '@/lib/blog';
 import { formatDate } from '@/lib/utils';
 import { SaveButton } from '@/components/blog/SaveButton';
 import { BlogActivityTracker } from '@/components/blog/BlogActivityTracker';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Params {
   params: { slug: string };
@@ -179,9 +182,9 @@ export default async function BlogPostPage({ params }: Params) {
   const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
 
   return (
-    <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
+    <div className="bg-background min-h-screen">
       {/* Hero */}
-      <section className="py-16 bg-gray-50 dark:bg-[#141414] border-b border-gray-100 dark:border-gray-800">
+      <section className="py-16 bg-muted border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
             href="/blog"
@@ -191,7 +194,7 @@ export default async function BlogPostPage({ params }: Params) {
           </Link>
 
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            <span className="badge-orange">{post.category}</span>
+            <Badge variant="brand">{post.category}</Badge>
             {post.visualType && (
               <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full font-medium">
                 {VISUAL_ICONS[post.visualType]}
@@ -203,11 +206,11 @@ export default async function BlogPostPage({ params }: Params) {
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-tight mb-6">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground leading-tight mb-6">
             {post.title}
           </h1>
 
-          <p className="text-xl text-gray-500 dark:text-gray-400 leading-relaxed mb-6">
+          <p className="text-xl text-muted-foreground leading-relaxed mb-6">
             {post.excerpt}
           </p>
 
@@ -241,7 +244,7 @@ export default async function BlogPostPage({ params }: Params) {
       {post.keyTakeaways && post.keyTakeaways.length > 0 && (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
           <div className="bg-orange-50 dark:bg-orange-500/5 border border-orange-200 dark:border-orange-500/20 rounded-2xl p-6">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-2">
               <CheckCircle size={18} className="text-orange-500 shrink-0" />
               Key Takeaways
             </h2>
@@ -278,18 +281,22 @@ export default async function BlogPostPage({ params }: Params) {
 
         {/* Work with us CTA */}
         <div className="mt-16 bg-orange-50 dark:bg-orange-500/5 border border-orange-200 dark:border-orange-500/20 rounded-2xl p-8 text-center">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+          <h3 className="text-2xl font-bold text-foreground mb-3">
             Ready to Apply This in Your Career?
           </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             LumaShift helps you turn insights like these into tangible career progress. Let&apos;s talk about where you are and where you want to be.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/contact" className="btn-primary">
-              Contact Us Now <ArrowRight size={16} />
+            <Link href="/contact">
+              <Button variant="brand" size="brand-default">
+                Contact Us Now <ArrowRight size={16} />
+              </Button>
             </Link>
-            <Link href="/quiz" className="btn-secondary">
-              Take the Career Quiz
+            <Link href="/quiz">
+              <Button variant="brandOutline" size="brand-default">
+                Take the Career Quiz
+              </Button>
             </Link>
           </div>
         </div>
@@ -300,23 +307,27 @@ export default async function BlogPostPage({ params }: Params) {
             {prevPost && (
               <Link
                 href={`/blog/${prevPost.slug}`}
-                className="card-hover group text-left p-5"
+                className="group text-left"
               >
+              <Card className="p-5 hover:shadow-md hover:-translate-y-0.5 transition-all">
                 <p className="text-xs text-gray-400 mb-1">← Previous</p>
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 group-hover:text-orange-500 transition-colors line-clamp-2">
                   {prevPost.title}
                 </p>
+              </Card>
               </Link>
             )}
             {nextPost && (
               <Link
                 href={`/blog/${nextPost.slug}`}
-                className="card-hover group text-right p-5 sm:col-start-2"
+                className="group text-right sm:col-start-2"
               >
+              <Card className="p-5 hover:shadow-md hover:-translate-y-0.5 transition-all">
                 <p className="text-xs text-gray-400 mb-1">Next →</p>
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 group-hover:text-orange-500 transition-colors line-clamp-2">
                   {nextPost.title}
                 </p>
+              </Card>
               </Link>
             )}
           </div>

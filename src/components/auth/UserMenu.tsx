@@ -70,7 +70,7 @@ export function UserMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-[#1E1E1E] rounded-xl border border-gray-100 dark:border-gray-800 shadow-xl py-1.5 z-50">
+        <div className="absolute right-0 top-full mt-2 w-52 bg-card rounded-xl border border-gray-100 dark:border-gray-800 shadow-xl py-1.5 z-50">
           {/* User info */}
           <div className="px-4 py-2.5 border-b border-gray-100 dark:border-gray-800">
             <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">

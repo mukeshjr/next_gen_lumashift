@@ -6,6 +6,8 @@ import { CheckCircle, X, Plus, ArrowRight } from 'lucide-react';
 import { roles } from '@/data/roles';
 import { services } from '@/data/services';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 const COMPARE_FIELDS = [
   { key: 'summary', label: 'Overview' },
@@ -21,10 +23,10 @@ const COMPARE_FIELDS = [
   { key: 'recommendedServices', label: 'LumaShift Services' },
 ] as const;
 
-const demandColors: Record<string, string> = {
-  High: 'badge-orange',
-  'Very High': 'badge-green',
-  Critical: 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 badge',
+const demandVariants: Record<string, 'brand' | 'success' | 'destructive'> = {
+  High: 'brand',
+  'Very High': 'success',
+  Critical: 'destructive',
 };
 
 export function RoleCompare() {
@@ -64,9 +66,9 @@ export function RoleCompare() {
 
     if (key === 'demandLevel') {
       return (
-        <span className={cn(demandColors[val as string] ?? 'badge-gray', 'badge')}>
+        <Badge variant={demandVariants[val as string] ?? 'muted'}>
           {val as string}
-        </span>
+        </Badge>
       );
     }
 
@@ -90,7 +92,7 @@ export function RoleCompare() {
     <div className="space-y-8">
       {/* Role picker */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+        <h2 className="text-lg font-bold text-foreground mb-4">
           Select 2–3 roles to compare
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -157,10 +159,10 @@ export function RoleCompare() {
                     <X size={11} />
                   </button>
                   <div className="text-3xl mb-1">{role.icon}</div>
-                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">{role.title}</h3>
-                  <span className={cn('badge mt-2', demandColors[role.demandLevel] ?? 'badge-gray')}>
+                  <h3 className="font-bold text-foreground text-sm">{role.title}</h3>
+                  <Badge variant={demandVariants[role.demandLevel] ?? 'muted'} className="mt-2">
                     {role.demandLevel} Demand
-                  </span>
+                  </Badge>
                 </div>
               ))}
             </div>
@@ -196,11 +198,15 @@ export function RoleCompare() {
               </div>
               {selectedRoles.map((role) => (
                 <div key={role.id} className="flex flex-col gap-2">
-                  <Link href={`/career/${role.id}`} className="btn-secondary text-sm py-2 text-center">
-                    Career Guide
+                  <Link href={`/career/${role.id}`}>
+                    <Button variant="brandOutline" size="brand-sm" className="w-full justify-center">
+                      Career Guide
+                    </Button>
                   </Link>
-                  <Link href={`/contact?role=${role.id}`} className="btn-primary text-sm py-2 text-center">
-                    Contact Us <ArrowRight size={13} />
+                  <Link href={`/contact?role=${role.id}`}>
+                    <Button variant="brand" size="brand-sm" className="w-full justify-center">
+                      Contact Us <ArrowRight size={13} />
+                    </Button>
                   </Link>
                 </div>
               ))}

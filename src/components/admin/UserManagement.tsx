@@ -25,6 +25,7 @@ import {
 import { cn, formatDate } from '@/lib/utils';
 import { computeProfileCompletion } from '@/lib/profile-completion';
 import type { AdminUserRow } from '@/app/admin/users/page';
+import { Button } from '@/components/ui/button';
 
 /* ─── Sort Configuration ──────────────────────────────────────────────────── */
 
@@ -408,11 +409,10 @@ export default function UserManagement({ users }: UserManagementProps) {
                 {stats.total} registered {stats.total === 1 ? 'user' : 'users'}
               </p>
             </div>
-            <Link
-              href="/admin/blog"
-              className="btn-ghost text-sm py-2 px-4"
-            >
-              <BookOpen size={15} /> Blog Admin
+            <Link href="/admin/blog">
+              <Button variant="brandGhost" size="brand-sm">
+                <BookOpen size={15} /> Blog Admin
+              </Button>
             </Link>
           </div>
 

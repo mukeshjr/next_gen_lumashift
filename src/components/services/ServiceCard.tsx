@@ -2,15 +2,18 @@ import Link from 'next/link';
 import { CheckCircle, ArrowRight, Star } from 'lucide-react';
 import { Service } from '@/types';
 import { cn } from '@/lib/utils';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface ServiceCardProps {
   service: Service;
 }
 
-const tierColors = {
-  starter: 'badge-gray',
-  professional: 'badge-orange',
-  advanced: 'badge-green',
+const tierVariant = {
+  starter: 'muted' as const,
+  professional: 'brand' as const,
+  advanced: 'success' as const,
 };
 
 const tierLabels = {
@@ -21,11 +24,11 @@ const tierLabels = {
 
 export function ServiceCard({ service }: ServiceCardProps) {
   return (
-    <div
+    <Card
       id={service.id}
       className={cn(
-        'relative flex flex-col card-hover',
-        service.popular && 'ring-2 ring-orange-500 ring-offset-2 dark:ring-offset-[#0A0A0A]'
+        'relative flex flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-lg',
+        service.popular && 'ring-2 ring-orange-500 ring-offset-2 dark:ring-offset-background'
       )}
     >
       {/* Popular badge */}
@@ -46,19 +49,17 @@ export function ServiceCard({ service }: ServiceCardProps) {
         </div>
       )}
 
-      <div className="p-6 flex flex-col gap-4 flex-1">
+      <CardContent className="flex flex-col gap-4 flex-1 pt-2">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className={tierColors[service.tier]}>{tierLabels[service.tier]}</span>
+              <Badge variant={tierVariant[service.tier]}>{tierLabels[service.tier]}</Badge>
               {service.track && (
-                <span className="badge bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                  {service.track} Track
-                </span>
+                <Badge variant="info">{service.track} Track</Badge>
               )}
             </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-snug">
+            <h3 className="text-lg font-bold text-foreground leading-snug">
               {service.title}
             </h3>
           </div>
@@ -66,7 +67,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
             <div className="text-right shrink-0">
               <p className="text-xl font-bold text-orange-500">{service.price}</p>
               {service.duration && (
-                <p className="text-xs text-gray-400 mt-0.5">{service.duration}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{service.duration}</p>
               )}
             </div>
           )}
@@ -74,46 +75,43 @@ export function ServiceCard({ service }: ServiceCardProps) {
 
         {/* Who it's for */}
         <div className="bg-orange-50 dark:bg-orange-500/5 border border-orange-100 dark:border-orange-500/10 rounded-lg px-4 py-2.5">
-          <p className="text-xs font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider mb-0.5">Who This Is For</p>
-          <p className="text-sm text-gray-600 dark:text-gray-300">{service.forWho}</p>
+          <p className="text-caption text-orange-600 dark:text-orange-400 mb-0.5">Who This Is For</p>
+          <p className="text-sm text-muted-foreground">{service.forWho}</p>
         </div>
 
         {/* Description */}
-        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           {service.description}
         </p>
 
         {/* Outcomes */}
         <div className="flex-1">
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+          <p className="text-caption text-muted-foreground mb-2">
             What You Get
           </p>
           <ul className="space-y-1.5">
             {service.outcomes.map((outcome, i) => (
               <li key={i} className="flex items-start gap-2">
-                <CheckCircle
-                  size={15}
-                  className="text-orange-500 shrink-0 mt-0.5"
-                />
-                <span className="text-sm text-gray-600 dark:text-gray-300">{outcome}</span>
+                <CheckCircle size={15} className="text-orange-500 shrink-0 mt-0.5" />
+                <span className="text-sm text-muted-foreground">{outcome}</span>
               </li>
             ))}
           </ul>
         </div>
-      </div>
+      </CardContent>
 
       {/* CTA */}
-      <div className="px-6 pb-6">
-        <Link
-          href={`/contact?service=${service.id}`}
-          className={cn(
-            'btn-primary w-full justify-center',
-            service.popular ? 'bg-orange-500 hover:bg-orange-600' : 'btn-secondary'
-          )}
-        >
-          Contact Us Now <ArrowRight size={16} />
+      <CardFooter className="border-0 bg-transparent px-4 pb-4">
+        <Link href={`/contact?service=${service.id}`} className="w-full">
+          <Button
+            variant={service.popular ? 'brand' : 'brandOutline'}
+            size="brand-default"
+            className="w-full"
+          >
+            Contact Us Now <ArrowRight size={16} />
+          </Button>
         </Link>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

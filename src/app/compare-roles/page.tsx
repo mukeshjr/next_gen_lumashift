@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default function CompareRolesPage() {
   return (
-    <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
+    <div className="bg-background min-h-screen">
       {/* Hero */}
-      <section className="py-20 bg-gray-50 dark:bg-[#141414] border-b border-gray-100 dark:border-gray-800">
+      <section className="py-20 bg-muted border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="section-tag mx-auto w-fit">Role Comparison Tool</span>
           <h1 className="section-title mt-4">

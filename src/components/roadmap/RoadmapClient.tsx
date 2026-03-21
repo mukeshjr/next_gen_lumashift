@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { getStageIndex } from '@/data/career-pathways';
 import { getServiceById } from '@/data/services';
 import { PlanGenerator } from '@/components/roadmap/PlanGenerator';
+import { Button } from '@/components/ui/button';
 import type {
   UserProfile,
   QuizResultRecord,
@@ -224,13 +225,17 @@ export function RoadmapClient({
             {/* CTA if not logged in */}
             {!profile && (
               <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-                <Link href="/auth/login?redirectTo=/roadmap" className="btn-primary">
-                  <LogIn size={16} />
-                  Log in to personalise
+                <Link href="/auth/login?redirectTo=/roadmap">
+                  <Button variant="brand" size="brand-default">
+                    <LogIn size={16} />
+                    Log in to personalise
+                  </Button>
                 </Link>
-                <Link href="/quiz" className="btn-secondary">
-                  <Sparkles size={16} />
-                  Take the Quiz first
+                <Link href="/quiz">
+                  <Button variant="brandOutline" size="brand-default">
+                    <Sparkles size={16} />
+                    Take the Quiz first
+                  </Button>
                 </Link>
               </div>
             )}
@@ -668,8 +673,10 @@ export function RoadmapClient({
                   <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
                     Get personalised role recommendations and see where you stand.
                   </p>
-                  <Link href="/quiz" className="btn-primary w-full justify-center text-sm">
-                    Start Quiz <ArrowRight size={14} />
+                  <Link href="/quiz" className="w-full">
+                    <Button variant="brand" size="brand-sm" className="w-full justify-center">
+                      Start Quiz <ArrowRight size={14} />
+                    </Button>
                   </Link>
                 </div>
               )}
@@ -691,15 +698,19 @@ export function RoadmapClient({
                 <div className="mt-6 space-y-2">
                   <Link
                     href="/auth/login?redirectTo=/roadmap"
-                    className="btn-primary w-full justify-center text-sm"
+                    className="w-full"
                   >
-                    <LogIn size={14} /> Log in
+                    <Button variant="brand" size="brand-sm" className="w-full justify-center">
+                      <LogIn size={14} /> Log in
+                    </Button>
                   </Link>
                   <Link
                     href="/quiz"
-                    className="btn-ghost w-full justify-center text-sm"
+                    className="w-full"
                   >
-                    <Sparkles size={14} /> Take the Quiz
+                    <Button variant="brandGhost" size="brand-sm" className="w-full justify-center">
+                      <Sparkles size={14} /> Take the Quiz
+                    </Button>
                   </Link>
                 </div>
               </div>

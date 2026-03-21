@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Linkedin, Mail, CheckCircle, ArrowRight } from 'lucide-react';
 import { team } from '@/data/team';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 
 export const metadata: Metadata = {
   title: 'Meet the Team',
@@ -11,9 +14,9 @@ export const metadata: Metadata = {
 
 export default function TeamPage() {
   return (
-    <div className="bg-white dark:bg-[#0A0A0A]">
+    <div className="bg-background">
       {/* Hero */}
-      <section className="py-20 bg-gray-50 dark:bg-[#141414] border-b border-gray-100 dark:border-gray-800">
+      <section className="py-20 bg-muted border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="section-tag mx-auto w-fit">The Team</span>
           <h1 className="section-title mt-4">
@@ -38,14 +41,14 @@ export default function TeamPage() {
             >
               {/* Profile card */}
               <div className={`${index % 2 === 1 ? 'md:order-2' : ''}`}>
-                <div className="card sticky top-24">
+                <Card className="sticky top-24 p-6">
                   {/* Avatar placeholder */}
                   <div className="w-full aspect-square max-w-[280px] mx-auto bg-gradient-to-br from-orange-500/20 to-orange-500/5 rounded-2xl flex items-center justify-center mb-6 text-8xl font-black text-orange-500/30">
                     {member.name[0]}
                   </div>
 
                   <div className="text-center mb-6">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white">{member.name}</h2>
+                    <h2 className="text-2xl font-black text-foreground">{member.name}</h2>
                     <p className="text-orange-500 font-semibold mt-1">{member.role}</p>
                   </div>
 
@@ -73,18 +76,18 @@ export default function TeamPage() {
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Certifications</p>
                     <div className="flex flex-wrap gap-2">
                       {member.certifications.map((cert) => (
-                        <span key={cert} className="badge-orange text-xs px-2 py-1">
+                        <Badge key={cert} variant="brand">
                           {cert}
-                        </span>
+                        </Badge>
                       ))}
                     </div>
                   </div>
-                </div>
+                </Card>
               </div>
 
               {/* Bio and expertise */}
               <div className={`${index % 2 === 1 ? 'md:order-1' : ''}`}>
-                <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-4">
+                <h2 className="text-3xl font-black text-foreground mb-4">
                   {member.name}
                 </h2>
                 <div className="prose-custom max-w-none mb-8">
@@ -97,7 +100,7 @@ export default function TeamPage() {
 
                 {/* Expertise */}
                 <div className="mb-8">
-                  <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                     Areas of Expertise
                   </p>
                   <ul className="space-y-2">
@@ -112,12 +115,12 @@ export default function TeamPage() {
 
                 {/* LinkedIn embed note */}
                 {member.name.includes('Mukesh') && (
-                  <div className="card bg-blue-50 dark:bg-blue-500/5 border-blue-100 dark:border-blue-500/20">
+                  <Card className="p-6 bg-blue-50 dark:bg-blue-500/5 border-blue-100 dark:border-blue-500/20">
                     <div className="flex items-start gap-3">
                       <Linkedin size={20} className="text-blue-600 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Connect on LinkedIn</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                        <p className="font-semibold text-foreground text-sm mb-1">Connect on LinkedIn</p>
+                        <p className="text-sm text-muted-foreground mb-3">
                           Follow Mukesh for daily cybersecurity career tips and industry insights.
                         </p>
                         <a
@@ -130,16 +133,16 @@ export default function TeamPage() {
                         </a>
                       </div>
                     </div>
-                  </div>
+                  </Card>
                 )}
 
                 {member.name.includes('Lavanyah') && (
-                  <div className="card bg-blue-50 dark:bg-blue-500/5 border-blue-100 dark:border-blue-500/20">
+                  <Card className="p-6 bg-blue-50 dark:bg-blue-500/5 border-blue-100 dark:border-blue-500/20">
                     <div className="flex items-start gap-3">
                       <Linkedin size={20} className="text-blue-600 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Connect on LinkedIn</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                        <p className="font-semibold text-foreground text-sm mb-1">Connect on LinkedIn</p>
+                        <p className="text-sm text-muted-foreground mb-3">
                           Follow Lavanyah for GRC insights, compliance updates, and career advice.
                         </p>
                         <a
@@ -152,7 +155,7 @@ export default function TeamPage() {
                         </a>
                       </div>
                     </div>
-                  </div>
+                  </Card>
                 )}
               </div>
             </div>
@@ -161,7 +164,7 @@ export default function TeamPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-gray-50 dark:bg-[#141414]">
+      <section className="py-20 bg-muted">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="section-title">Work with Mukesh or Lavanyah Directly</h2>
           <p className="section-subtitle mt-4 mx-auto">
@@ -169,11 +172,15 @@ export default function TeamPage() {
             with the co-founders.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <Link href="/contact" className="btn-primary text-lg px-8 py-4">
-              Contact Us Now <ArrowRight size={20} />
+            <Link href="/contact">
+              <Button variant="brand" size="brand-lg">
+                Contact Us Now <ArrowRight size={20} />
+              </Button>
             </Link>
-            <Link href="/services" className="btn-secondary text-lg px-8 py-4">
-              Explore Services
+            <Link href="/services">
+              <Button variant="brandOutline" size="brand-lg">
+                Explore Services
+              </Button>
             </Link>
           </div>
         </div>

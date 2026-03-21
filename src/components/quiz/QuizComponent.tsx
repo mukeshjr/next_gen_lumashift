@@ -23,6 +23,8 @@ import { roles } from '@/data/roles';
 import { services } from '@/data/services';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 type Answers = Record<string, string | string[] | number>;
 
@@ -217,15 +219,17 @@ export function QuizComponent() {
             { icon: '🎯', label: 'Personalised results' },
             { icon: '🔒', label: 'No spam, ever' },
           ].map((item) => (
-            <div key={item.label} className="card py-5">
-              <p className="text-3xl mb-1">{item.icon}</p>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{item.label}</p>
-            </div>
+            <Card key={item.label} className="py-5 items-center">
+              <CardContent className="text-center">
+                <p className="text-3xl mb-1">{item.icon}</p>
+                <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
-        <button onClick={() => setStep(1)} className="btn-primary text-lg px-10 py-4 w-full sm:w-auto">
+        <Button onClick={() => setStep(1)} variant="brand" size="brand-lg" className="w-full sm:w-auto px-10">
           Start the Quiz <ChevronRight size={20} />
-        </button>
+        </Button>
       </div>
     );
   }
@@ -256,7 +260,7 @@ export function QuizComponent() {
       <div className="max-w-4xl mx-auto py-12 px-4 space-y-10">
 
         {/* Score banner */}
-        <div className={`card bg-gradient-to-br ${scoreBg} text-center py-10 border-0`}>
+        <Card className={`bg-gradient-to-br ${scoreBg} text-center py-10 border-0 ring-0`}>
           <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
             Your Confidence Score
           </p>
@@ -275,10 +279,10 @@ export function QuizComponent() {
               style={{ width: `${(result.confidenceScore / 5) * 100}%` }}
             />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-muted-foreground">
             Composite of: resume confidence · interview readiness · LinkedIn visibility
           </p>
-        </div>
+        </Card>
 
         {/* Saved to dashboard indicator */}
         {resultSaved && (
@@ -310,8 +314,10 @@ export function QuizComponent() {
                   Based on your score and where you are right now, a focused 30-minute conversation
                   will give you a clearer path forward than any guide or article can. No pressure — just clarity.
                 </p>
-                <Link href="/contact?service=career-consultation-30" className="btn-primary text-sm">
-                  Contact Us for a Consultation <ArrowRight size={15} />
+                <Link href="/contact?service=career-consultation-30">
+                  <Button variant="brand" size="brand-sm">
+                    Contact Us for a Consultation <ArrowRight size={15} />
+                  </Button>
                 </Link>
               </div>
             </div>
@@ -322,32 +328,36 @@ export function QuizComponent() {
         {(result.strengths.length > 0 || result.gaps.length > 0) && (
           <div className="grid sm:grid-cols-2 gap-4">
             {result.strengths.length > 0 && (
-              <div className="card border-green-100 dark:border-green-500/20">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <Award size={18} className="text-green-500" /> Your Strengths
-                </h3>
-                <ul className="space-y-2">
-                  {result.strengths.map((s) => (
-                    <li key={s} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                      <CheckCircle size={15} className="text-green-500 shrink-0 mt-0.5" /> {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <Card className="border-green-100 dark:border-green-500/20 ring-0 border">
+                <CardContent>
+                  <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
+                    <Award size={18} className="text-green-500" /> Your Strengths
+                  </h3>
+                  <ul className="space-y-2">
+                    {result.strengths.map((s) => (
+                      <li key={s} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
+                        <CheckCircle size={15} className="text-green-500 shrink-0 mt-0.5" /> {s}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
             )}
             {result.gaps.length > 0 && (
-              <div className="card border-orange-100 dark:border-orange-500/20">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <Zap size={18} className="text-orange-500" /> Areas to Develop
-                </h3>
-                <ul className="space-y-2">
-                  {result.gaps.map((g) => (
-                    <li key={g} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                      <ArrowRight size={15} className="text-orange-500 shrink-0 mt-0.5" /> {g}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <Card className="border-orange-100 dark:border-orange-500/20 ring-0 border">
+                <CardContent>
+                  <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
+                    <Zap size={18} className="text-orange-500" /> Areas to Develop
+                  </h3>
+                  <ul className="space-y-2">
+                    {result.gaps.map((g) => (
+                      <li key={g} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
+                        <ArrowRight size={15} className="text-orange-500 shrink-0 mt-0.5" /> {g}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
             )}
           </div>
         )}
@@ -376,7 +386,7 @@ export function QuizComponent() {
                   'flex items-center gap-4 p-5 rounded-2xl border-2 transition-all hover:-translate-y-0.5',
                   i === 0
                     ? 'border-orange-500 bg-orange-50 dark:bg-orange-500/10'
-                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1E1E1E]'
+                    : 'border-gray-200 dark:border-gray-700 bg-card'
                 )}
               >
                 <div
@@ -409,7 +419,7 @@ export function QuizComponent() {
                   className={cn(
                     'shrink-0 text-sm font-semibold px-4 py-2 rounded-xl transition-all',
                     i === 0
-                      ? 'btn-primary text-sm py-2'
+                      ? 'bg-orange-500 text-white font-semibold rounded-xl shadow-lg shadow-orange-500/25 hover:bg-orange-600 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 text-sm py-2'
                       : 'border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-orange-400 hover:text-orange-500'
                   )}
                 >
@@ -421,7 +431,7 @@ export function QuizComponent() {
         </div>
 
         {/* CAREER JOURNEY PATHWAY */}
-        <div className="card bg-gray-50 dark:bg-[#141414] border-gray-200 dark:border-gray-700">
+        <Card className="bg-muted border-gray-200 dark:border-gray-700 ring-0 border">
           <div className="flex items-center gap-3 mb-6">
             <TrendingUp size={20} className="text-orange-500" />
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -461,7 +471,7 @@ export function QuizComponent() {
                   <Link
                     key={svc.id}
                     href={`/services#${svc.id}`}
-                    className="flex items-center gap-2 p-3 rounded-xl bg-white dark:bg-[#1E1E1E] border border-gray-100 dark:border-gray-800 hover:border-orange-300 dark:hover:border-orange-700 transition-all group"
+                    className="flex items-center gap-2 p-3 rounded-xl bg-card border border-gray-100 dark:border-gray-800 hover:border-orange-300 dark:hover:border-orange-700 transition-all group"
                   >
                     <Lightbulb size={14} className="text-orange-400 shrink-0" />
                     <span className="text-sm text-gray-600 dark:text-gray-300 group-hover:text-orange-500 transition-colors font-medium">
@@ -473,7 +483,7 @@ export function QuizComponent() {
               </div>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Recommended Roles */}
         {recRoles.length > 0 && (
@@ -486,7 +496,7 @@ export function QuizComponent() {
                 <Link
                   key={role.id}
                   href={`/career/${role.id}`}
-                  className="card-hover group flex flex-col"
+                  className="group flex flex-col rounded-xl bg-card p-5 ring-1 ring-foreground/10 transition-all hover:-translate-y-1 hover:shadow-lg"
                 >
                   <div className="text-3xl mb-2">{role.icon}</div>
                   <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-orange-500 transition-colors">
@@ -515,7 +525,7 @@ export function QuizComponent() {
 
         {/* Lead capture */}
         {!leadSubmitted ? (
-          <div className="card bg-gradient-to-br from-orange-500/10 to-orange-400/5 border-orange-200 dark:border-orange-500/30">
+          <Card className="bg-gradient-to-br from-orange-500/10 to-orange-400/5 border-orange-200 dark:border-orange-500/30 ring-0 border">
             <div className="flex items-start gap-4 mb-4">
               <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center shrink-0">
                 <CheckCircle size={20} className="text-orange-500" />
@@ -544,15 +554,17 @@ export function QuizComponent() {
                 onChange={(e) => setLeadForm((f) => ({ ...f, email: e.target.value }))}
                 className="form-input flex-1"
               />
-              <button
+              <Button
                 onClick={submitLead}
                 disabled={!leadForm.name || !leadForm.email}
-                className="btn-primary whitespace-nowrap disabled:opacity-50"
+                variant="brand"
+                size="brand-default"
+                className="whitespace-nowrap disabled:opacity-50"
               >
                 Send Results
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         ) : (
           <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl">
             <CheckCircle size={20} className="text-green-500" />
@@ -563,11 +575,13 @@ export function QuizComponent() {
         )}
 
         <div className="flex justify-center gap-4 pt-2">
-          <button onClick={restart} className="btn-ghost flex items-center gap-2">
+          <Button onClick={restart} variant="brandGhost" size="brand-default" className="flex items-center gap-2">
             <RefreshCw size={16} /> Retake Quiz
-          </button>
-          <Link href="/contact" className="btn-primary">
-            Contact a Coach <ArrowRight size={16} />
+          </Button>
+          <Link href="/contact">
+            <Button variant="brand" size="brand-default">
+              Contact a Coach <ArrowRight size={16} />
+            </Button>
           </Link>
         </div>
       </div>
@@ -593,8 +607,8 @@ export function QuizComponent() {
         </div>
       </div>
 
-      <div className="card p-8 mb-6">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+      <Card className="p-8 mb-6">
+        <h2 className="text-xl font-bold text-foreground mb-6 px-4">
           {currentQuestion?.question}
         </h2>
 
@@ -688,23 +702,25 @@ export function QuizComponent() {
             </div>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Navigation */}
       <div className="flex justify-between">
         {step > 1 ? (
-          <button onClick={() => setStep((s) => s - 1)} className="btn-ghost">
+          <Button onClick={() => setStep((s) => s - 1)} variant="brandGhost" size="brand-default">
             <ChevronLeft size={16} /> Back
-          </button>
+          </Button>
         ) : <div />}
-        <button
+        <Button
           onClick={() => setStep((s) => s + 1)}
           disabled={!canProceed()}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          variant="brand"
+          size="brand-default"
+          className="disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
           {step === totalSteps ? 'See My Results' : 'Next'}
           <ChevronRight size={16} />
-        </button>
+        </Button>
       </div>
     </div>
   );

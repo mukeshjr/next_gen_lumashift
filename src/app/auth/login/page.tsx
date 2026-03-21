@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Shield, Mail, Loader2, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 function GoogleIcon() {
   return (
@@ -81,7 +83,7 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0A0A0A] flex items-center justify-center px-4 py-16">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link href="/" className="inline-flex items-center gap-2.5 mb-10">
@@ -93,7 +95,7 @@ function LoginContent() {
           </span>
         </Link>
 
-        <div className="card p-8">
+        <Card className="p-8">
           <h1 className="text-2xl font-black text-gray-900 dark:text-white mb-2">
             Sign in to LumaShift
           </h1>
@@ -175,22 +177,24 @@ function LoginContent() {
                   />
                 </div>
               </div>
-              <button
+              <Button
                 type="submit"
                 disabled={magicLoading || !email || cooldown > 0}
-                className="btn-primary w-full justify-center disabled:opacity-60"
+                variant="brand"
+                size="brand-default"
+                className="w-full justify-center disabled:opacity-60"
               >
                 {magicLoading ? (
                   <Loader2 size={16} className="animate-spin" />
                 ) : null}
                 Send Magic Link
-              </button>
+              </Button>
               <p className="text-xs text-gray-400 text-center">
                 No password needed. Click the link in your email to sign in.
               </p>
             </form>
           )}
-        </div>
+        </Card>
 
         {/* Footer */}
         <div className="mt-6 text-center">
@@ -209,7 +213,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-white dark:bg-[#0A0A0A] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 size={32} className="animate-spin text-orange-500" />
       </div>
     }>

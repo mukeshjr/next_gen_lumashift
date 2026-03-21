@@ -325,7 +325,7 @@ export default function AchievementsClient({
   const earnedCount = BADGES.filter((b) => earnedBadgeMap.has(b.id)).length;
 
   return (
-    <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
+    <div className="bg-background min-h-screen">
       {/* ── Hero Section ── */}
       <section className="relative overflow-hidden py-12 md:py-16 bg-gray-50 dark:bg-cyber-midnight border-b border-gray-100 dark:border-cyber-border">
         {/* Cyber grid background */}

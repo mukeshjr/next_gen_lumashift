@@ -36,9 +36,9 @@ const tiers = [
 
 export default function ServicesPage() {
   return (
-    <div className="bg-white dark:bg-[#0A0A0A]">
+    <div className="bg-background">
       {/* Hero */}
-      <section className="py-20 bg-gray-50 dark:bg-[#141414] border-b border-gray-100 dark:border-gray-800">
+      <section className="py-20 bg-muted border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="section-tag mx-auto w-fit">Full Service Catalogue</span>
           <h1 className="section-title mt-4">
@@ -55,7 +55,7 @@ export default function ServicesPage() {
               'Malaysian + global market knowledge',
               'Fast turnaround times',
             ].map((item) => (
-              <span key={item} className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 font-medium">
+              <span key={item} className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
                 <CheckCircle size={15} className="text-orange-500" /> {item}
               </span>
             ))}
@@ -76,9 +76,9 @@ export default function ServicesPage() {
                     <span className={`px-3 py-1 rounded-full text-sm font-bold ${tier.color}`}>
                       {tier.title}
                     </span>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">{tier.subtitle}</span>
+                    <span className="text-sm text-muted-foreground">{tier.subtitle}</span>
                   </div>
-                  <p className="text-gray-500 dark:text-gray-400 max-w-xl">{tier.desc}</p>
+                  <p className="text-muted-foreground max-w-xl">{tier.desc}</p>
                 </div>
               </div>
 

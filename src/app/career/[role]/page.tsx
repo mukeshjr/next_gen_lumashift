@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { CheckCircle, ArrowRight, TrendingUp, BookOpen, ArrowLeft } from 'lucide-react';
 import { getRoleById, getAllRoleIds, roles } from '@/data/roles';
 import { services } from '@/data/services';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Params {
   params: { role: string };
@@ -36,13 +38,13 @@ export default function CareerRolePage({ params }: Params) {
   const otherRoles = roles.filter((r) => r.id !== role.id).slice(0, 3);
 
   return (
-    <div className="bg-white dark:bg-[#0A0A0A]">
+    <div className="bg-background">
       {/* Hero */}
-      <section className="py-16 bg-gray-50 dark:bg-[#141414] border-b border-gray-100 dark:border-gray-800">
+      <section className="py-16 bg-muted border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
             href="/compare-roles"
-            className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-orange-500 mb-6"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-orange-500 mb-6"
           >
             <ArrowLeft size={16} /> Compare with other roles
           </Link>
@@ -55,19 +57,23 @@ export default function CareerRolePage({ params }: Params) {
                   {role.demandLevel} Demand
                 </span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4 leading-tight">
+              <h1 className="text-4xl md:text-5xl font-black text-foreground mb-4 leading-tight">
                 {role.title}
               </h1>
-              <p className="text-lg text-gray-500 dark:text-gray-400 leading-relaxed">
+              <p className="text-lg text-muted-foreground leading-relaxed">
                 {role.summary}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                <Link href={`/contact?role=${role.id}`} className="btn-primary">
-                  Get Coaching for This Role <ArrowRight size={16} />
+                <Link href={`/contact?role=${role.id}`}>
+                  <Button variant="brand" size="brand-default">
+                    Get Coaching for This Role <ArrowRight size={16} />
+                  </Button>
                 </Link>
-                <Link href="/quiz" className="btn-secondary">
-                  Take the Career Quiz
+                <Link href="/quiz">
+                  <Button variant="brandOutline" size="brand-default">
+                    Take the Career Quiz
+                  </Button>
                 </Link>
               </div>
             </div>
@@ -75,23 +81,27 @@ export default function CareerRolePage({ params }: Params) {
             {/* Salary cards */}
             <div className="grid grid-cols-2 gap-4">
               {role.avgSalaryMY && (
-                <div className="card text-center py-6">
-                  <p className="text-xs text-gray-400 mb-1 uppercase tracking-wider">Avg Salary (MY)</p>
-                  <p className="text-xl font-black text-orange-500 leading-snug">{role.avgSalaryMY}</p>
-                </div>
+                <Card className="text-center py-6">
+                  <CardContent>
+                    <p className="text-xs text-gray-400 mb-1 uppercase tracking-wider">Avg Salary (MY)</p>
+                    <p className="text-xl font-black text-orange-500 leading-snug">{role.avgSalaryMY}</p>
+                  </CardContent>
+                </Card>
               )}
               {role.avgSalaryGlobal && (
-                <div className="card text-center py-6">
-                  <p className="text-xs text-gray-400 mb-1 uppercase tracking-wider">Avg Salary (Global)</p>
-                  <p className="text-xl font-black text-green-500 leading-snug">{role.avgSalaryGlobal}</p>
-                </div>
+                <Card className="text-center py-6">
+                  <CardContent>
+                    <p className="text-xs text-gray-400 mb-1 uppercase tracking-wider">Avg Salary (Global)</p>
+                    <p className="text-xl font-black text-green-500 leading-snug">{role.avgSalaryGlobal}</p>
+                  </CardContent>
+                </Card>
               )}
-              <div className="col-span-2 card text-center py-5">
+              <Card className="col-span-2 text-center py-5"><CardContent>
                 <p className="text-xs text-gray-400 mb-1 uppercase tracking-wider">Market Demand</p>
                 <p className={`text-2xl font-black ${demandColors[role.demandLevel].split(' ')[4] ?? 'text-orange-500'}`}>
                   {role.demandLevel}
                 </p>
-              </div>
+              </CardContent></Card>
             </div>
           </div>
         </div>
@@ -103,7 +113,7 @@ export default function CareerRolePage({ params }: Params) {
           <div className="lg:col-span-2 space-y-12">
             {/* Responsibilities */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <span className="w-8 h-8 bg-orange-500/10 rounded-lg flex items-center justify-center text-sm">📋</span>
                 What You&apos;ll Actually Do
               </h2>
@@ -119,7 +129,7 @@ export default function CareerRolePage({ params }: Params) {
 
             {/* Skills */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <span className="w-8 h-8 bg-orange-500/10 rounded-lg flex items-center justify-center text-sm">⚡</span>
                 Skills You Need
               </h2>
@@ -134,7 +144,7 @@ export default function CareerRolePage({ params }: Params) {
 
             {/* Tools */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <span className="w-8 h-8 bg-orange-500/10 rounded-lg flex items-center justify-center text-sm">🛠</span>
                 Tools &amp; Platforms
               </h2>
@@ -149,7 +159,7 @@ export default function CareerRolePage({ params }: Params) {
 
             {/* Certifications */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <BookOpen size={20} className="text-orange-500" />
                 Certifications to Target
               </h2>
@@ -167,7 +177,7 @@ export default function CareerRolePage({ params }: Params) {
 
             {/* Background fit */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-2xl font-bold text-foreground mb-4">
                 Who Is a Good Fit?
               </h2>
               <ul className="space-y-2">
@@ -181,7 +191,7 @@ export default function CareerRolePage({ params }: Params) {
 
             {/* Growth path */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <TrendingUp size={20} className="text-orange-500" />
                 Career Growth Path
               </h2>
@@ -206,8 +216,8 @@ export default function CareerRolePage({ params }: Params) {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Recommended services */}
-            <div className="card sticky top-24">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-4">
+            <Card className="sticky top-24 p-6">
+              <h3 className="font-bold text-foreground mb-4">
                 LumaShift Services for {role.title}s
               </h3>
               <div className="space-y-3 mb-5">
@@ -227,14 +237,16 @@ export default function CareerRolePage({ params }: Params) {
                   </Link>
                 ))}
               </div>
-              <Link href={`/contact?role=${role.id}`} className="btn-primary w-full justify-center">
-                Contact Us Now <ArrowRight size={16} />
+              <Link href={`/contact?role=${role.id}`} className="w-full">
+                <Button variant="brand" size="brand-default" className="w-full justify-center">
+                  Contact Us Now <ArrowRight size={16} />
+                </Button>
               </Link>
-            </div>
+            </Card>
 
             {/* Compare with other roles */}
-            <div className="card">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-3">Compare with Other Roles</h3>
+            <Card className="p-6">
+              <h3 className="font-bold text-foreground mb-3">Compare with Other Roles</h3>
               <div className="space-y-2 mb-4">
                 {otherRoles.map((r) => (
                   <Link
@@ -252,7 +264,7 @@ export default function CareerRolePage({ params }: Params) {
               <Link href="/compare-roles" className="text-sm text-orange-500 hover:underline font-medium">
                 Full comparison tool →
               </Link>
-            </div>
+            </Card>
           </div>
         </div>
       </div>

@@ -198,7 +198,7 @@ export function ChatBot() {
       <div
         className={cn(
           'fixed bottom-6 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)]',
-          'bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700',
+          'bg-card rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700',
           'flex flex-col transition-all duration-300 origin-bottom-right',
           open ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none',
           minimised ? 'h-14' : 'h-[520px]'

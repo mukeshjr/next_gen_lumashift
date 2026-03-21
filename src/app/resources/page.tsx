@@ -7,6 +7,9 @@ import { getFreeResources, getPremiumResources, getAllResourceCategories } from 
 import { ResourceUnlockForm } from '@/components/forms/ResourceUnlockForm';
 import { BookmarkButton } from '@/components/resources/BookmarkButton';
 import { Resource } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 
 const iconMap: Record<Resource['type'], React.ReactNode> = {
   pdf: <FileText size={20} className="text-orange-500" />,
@@ -29,9 +32,9 @@ export default function ResourcesPage() {
     activeCategory ? list.filter((r) => r.category === activeCategory) : list;
 
   return (
-    <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
+    <div className="bg-background min-h-screen">
       {/* Hero */}
-      <section className="py-20 bg-gray-50 dark:bg-[#141414] border-b border-gray-100 dark:border-gray-800">
+      <section className="py-20 bg-muted border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="section-tag mx-auto w-fit">Free + Premium Resources</span>
           <h1 className="section-title mt-4">
@@ -76,38 +79,40 @@ export default function ResourcesPage() {
         {/* Free resources */}
         <div className="mb-14">
           <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Free Resources</h2>
-            <span className="badge-green">No sign-up required</span>
+            <h2 className="text-2xl font-bold text-foreground">Free Resources</h2>
+            <Badge variant="success">No sign-up required</Badge>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filterResources(freeResources).map((resource) => (
-              <div key={resource.id} className="card-hover flex flex-col">
+              <Card key={resource.id} className="p-5 flex flex-col hover:shadow-md hover:-translate-y-0.5 transition-all">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center shrink-0">
                     {iconMap[resource.type]}
                   </div>
                   <div>
                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{resource.type}</span>
-                    <h3 className="font-bold text-gray-900 dark:text-white text-sm leading-snug mt-0.5">
+                    <h3 className="font-bold text-foreground text-sm leading-snug mt-0.5">
                       {resource.title}
                     </h3>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed flex-1 mb-4">
+                <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">
                   {resource.description}
                 </p>
                 <div className="flex gap-2">
                   <a
                     href={resource.downloadUrl ?? '#'}
                     download
-                    className="btn-primary text-sm py-2 flex-1 justify-center"
+                    className="flex-1"
                   >
-                    <Download size={15} /> Download Free
+                    <Button variant="brand" size="brand-sm" className="w-full justify-center">
+                      <Download size={15} /> Download Free
+                    </Button>
                   </a>
                   <BookmarkButton resourceId={resource.id} title={resource.title} />
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
@@ -115,10 +120,10 @@ export default function ResourcesPage() {
         {/* Premium resources */}
         <div>
           <div className="flex items-center gap-3 mb-3">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Premium Resources</h2>
-            <span className="badge-orange">Unlock for free</span>
+            <h2 className="text-2xl font-bold text-foreground">Premium Resources</h2>
+            <Badge variant="brand">Unlock for free</Badge>
           </div>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-muted-foreground mb-6">
             Share your name, email, and career goal — we&apos;ll send these directly to your inbox, along with a personalised note.
           </p>
 
@@ -126,11 +131,11 @@ export default function ResourcesPage() {
             {filterResources(premiumResources).map((resource) => (
               <div
                 key={resource.id}
-                className={`card-hover flex flex-col relative ${!unlocked ? 'cursor-pointer' : ''}`}
+                className={`flex flex-col relative rounded-xl bg-card p-5 ring-1 ring-foreground/10 hover:shadow-md hover:-translate-y-0.5 transition-all ${!unlocked ? 'cursor-pointer' : ''}`}
                 onClick={!unlocked ? () => setShowUnlockModal(true) : undefined}
               >
                 {!unlocked && (
-                  <div className="absolute inset-0 bg-white/70 dark:bg-[#1E1E1E]/70 backdrop-blur-[2px] rounded-2xl flex items-center justify-center z-10">
+                  <div className="absolute inset-0 bg-white/70 dark:bg-card/70 backdrop-blur-[2px] rounded-2xl flex items-center justify-center z-10">
                     <div className="text-center">
                       <Lock size={28} className="text-orange-500 mx-auto mb-2" />
                       <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">Unlock to access</p>
@@ -143,12 +148,12 @@ export default function ResourcesPage() {
                   </div>
                   <div>
                     <span className="text-xs font-semibold text-orange-500 uppercase tracking-wider">Premium</span>
-                    <h3 className="font-bold text-gray-900 dark:text-white text-sm leading-snug mt-0.5">
+                    <h3 className="font-bold text-foreground text-sm leading-snug mt-0.5">
                       {resource.title}
                     </h3>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed flex-1 mb-4">
+                <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">
                   {resource.description}
                 </p>
                 <div className="text-sm text-gray-400 flex items-center gap-2 font-medium">
@@ -166,11 +171,11 @@ export default function ResourcesPage() {
                   <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
                     <Unlock size={20} className="text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h3 className="text-xl font-bold text-foreground">
                     Unlock Premium Resources
                   </h3>
                 </div>
-                <p className="text-gray-500 dark:text-gray-400 mb-6">
+                <p className="text-muted-foreground mb-6">
                   Enter your details and we&apos;ll email you all premium resources instantly. No payment required.
                 </p>
                 <ResourceUnlockForm onSuccess={() => setUnlocked(true)} />
@@ -191,16 +196,18 @@ export default function ResourcesPage() {
       </div>
 
       {/* CTA */}
-      <section className="py-16 bg-gray-50 dark:bg-[#141414] mt-12">
+      <section className="py-16 bg-muted mt-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+          <h2 className="text-2xl font-bold text-foreground mb-3">
             Want Personalised Guidance Beyond These Resources?
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-muted-foreground mb-6">
             Our coaching goes far deeper than any guide. Let&apos;s talk about your specific situation.
           </p>
-          <Link href="/contact" className="btn-primary">
-            Contact Us Now <ArrowRight size={16} />
+          <Link href="/contact">
+            <Button variant="brand" size="brand-default">
+              Contact Us Now <ArrowRight size={16} />
+            </Button>
           </Link>
         </div>
       </section>

@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { computeProfileCompletion } from '@/lib/profile-completion';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 const CAREER_STAGES = [
   { value: 'student', label: 'Student' },
@@ -209,7 +211,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0A0A0A] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 size={32} className="animate-spin text-orange-500" />
       </div>
     );
@@ -221,9 +223,9 @@ export default function ProfilePage() {
     'bg-red-400';
 
   return (
-    <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
+    <div className="bg-background min-h-screen">
       {/* Header */}
-      <section className="py-10 bg-gray-50 dark:bg-[#141414] border-b border-gray-100 dark:border-gray-800">
+      <section className="py-10 bg-muted border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
             href="/dashboard"
@@ -231,13 +233,13 @@ export default function ProfilePage() {
           >
             <ChevronLeft size={15} /> Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">Edit Profile</h1>
-          <p className="text-gray-500 dark:text-gray-400">
+          <h1 className="text-3xl font-black text-foreground mb-2">Edit Profile</h1>
+          <p className="text-muted-foreground">
             Complete your profile to unlock badges and personalised recommendations.
           </p>
 
           {/* Completion bar */}
-          <div className="mt-6 p-4 bg-white dark:bg-[#1E1E1E] rounded-2xl border border-gray-100 dark:border-gray-800">
+          <div className="mt-6 p-4 bg-card rounded-2xl border border-gray-100 dark:border-gray-800">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Profile Completion</span>
               <span className="text-sm font-bold text-orange-500">{completion.score}% — {completion.label}</span>
@@ -253,8 +255,8 @@ export default function ProfilePage() {
         <form onSubmit={handleSave} className="space-y-8">
 
           {/* Basic Info */}
-          <div className="card">
-            <h2 className="font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+          <Card className="p-6">
+            <h2 className="font-bold text-foreground mb-5 flex items-center gap-2">
               <User size={18} className="text-orange-500" /> Basic Information
             </h2>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -283,11 +285,11 @@ export default function ProfilePage() {
                 />
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Career Info */}
-          <div className="card">
-            <h2 className="font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+          <Card className="p-6">
+            <h2 className="font-bold text-foreground mb-5 flex items-center gap-2">
               <Briefcase size={18} className="text-orange-500" /> Career Information
             </h2>
             <div className="grid sm:grid-cols-2 gap-4 mb-4">
@@ -339,11 +341,11 @@ export default function ProfilePage() {
                 ))}
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Cybersecurity Interests */}
-          <div className="card">
-            <h2 className="font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+          <Card className="p-6">
+            <h2 className="font-bold text-foreground mb-5 flex items-center gap-2">
               <Target size={18} className="text-orange-500" /> Cybersecurity Interests
             </h2>
             <div className="space-y-5">
@@ -362,11 +364,11 @@ export default function ProfilePage() {
                 placeholder="e.g. SIEM, Python, Risk Assessment"
               />
             </div>
-          </div>
+          </Card>
 
           {/* Certifications */}
-          <div className="card">
-            <h2 className="font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+          <Card className="p-6">
+            <h2 className="font-bold text-foreground mb-5 flex items-center gap-2">
               <Award size={18} className="text-orange-500" /> Certifications
             </h2>
             <div className="space-y-5">
@@ -385,7 +387,7 @@ export default function ProfilePage() {
                 placeholder="e.g. CISSP, OSCP"
               />
             </div>
-          </div>
+          </Card>
 
           {/* Save */}
           {error && (
@@ -403,16 +405,19 @@ export default function ProfilePage() {
           )}
 
           <div className="flex gap-3">
-            <button
+            <Button
               type="submit"
               disabled={saving}
-              className="btn-primary disabled:opacity-60"
+              variant="brand"
+              size="brand-default"
             >
               {saving && <Loader2 size={16} className="animate-spin" />}
               Save Profile
-            </button>
-            <Link href="/dashboard" className="btn-secondary">
-              Cancel
+            </Button>
+            <Link href="/dashboard">
+              <Button variant="brandOutline" size="brand-default">
+                Cancel
+              </Button>
             </Link>
           </div>
         </form>

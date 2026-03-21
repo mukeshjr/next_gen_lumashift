@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Mail, Clock, Shield, MessageSquare } from 'lucide-react';
 import { ContactForm } from '@/components/forms/ContactForm';
+import { Card } from '@/components/ui/card';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
@@ -33,9 +34,9 @@ const faqs = [
 
 export default function ContactPage() {
   return (
-    <div className="bg-white dark:bg-[#0A0A0A]">
+    <div className="bg-background">
       {/* Hero */}
-      <section className="py-20 bg-gray-50 dark:bg-[#141414] border-b border-gray-100 dark:border-gray-800">
+      <section className="py-20 bg-muted border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="section-tag mx-auto w-fit">Get in Touch</span>
           <h1 className="section-title mt-4">
@@ -51,10 +52,10 @@ export default function ContactPage() {
         <div className="grid lg:grid-cols-5 gap-12">
           {/* Form — wider */}
           <div className="lg:col-span-3">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h2 className="text-2xl font-bold text-foreground mb-2">
               Send Us a Message
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-8">
+            <p className="text-muted-foreground mb-8">
               Tell us your situation. The more context, the better our first response will be.
             </p>
             <ContactForm />
@@ -63,8 +64,8 @@ export default function ContactPage() {
           {/* Sidebar */}
           <div className="lg:col-span-2 space-y-6">
             {/* Contact info */}
-            <div className="card">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-4">Contact Details</h3>
+            <Card className="p-6">
+              <h3 className="font-bold text-foreground mb-4">Contact Details</h3>
               <div className="space-y-4">
                 <a
                   href="mailto:lumashift@outlook.com"
@@ -111,11 +112,11 @@ export default function ContactPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
 
             {/* What to expect */}
-            <div className="card">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-3">What Happens Next</h3>
+            <Card className="p-6">
+              <h3 className="font-bold text-foreground mb-3">What Happens Next</h3>
               <ol className="space-y-3">
                 {[
                   { step: '1', text: 'You send us a message with your background and goals.' },
@@ -131,21 +132,21 @@ export default function ContactPage() {
                   </li>
                 ))}
               </ol>
-            </div>
+            </Card>
           </div>
         </div>
 
         {/* FAQs */}
         <div className="mt-20">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-8 text-center">
             Frequently Asked Questions
           </h2>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {faqs.map((faq) => (
-              <div key={faq.q} className="card">
-                <h4 className="font-bold text-gray-900 dark:text-white mb-2 text-sm">{faq.q}</h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{faq.a}</p>
-              </div>
+              <Card key={faq.q} className="p-6">
+                <h4 className="font-bold text-foreground mb-2 text-sm">{faq.q}</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+              </Card>
             ))}
           </div>
         </div>

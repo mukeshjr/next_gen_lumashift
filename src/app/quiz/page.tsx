@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function QuizPage() {
   return (
-    <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
+    <div className="bg-background min-h-screen">
       <QuizComponent />
     </div>
   );

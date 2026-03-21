@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { Unlock, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ResourceUnlockFormProps {
   onSuccess?: () => void;
@@ -114,17 +115,19 @@ export function ResourceUnlockForm({ onSuccess }: ResourceUnlockFormProps) {
         </div>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={status === 'loading'}
-        className="btn-primary w-full justify-center disabled:opacity-60"
+        variant="brand"
+        size="brand-default"
+        className="w-full justify-center disabled:opacity-60"
       >
         {status === 'loading' ? (
           <><Loader size={15} className="animate-spin" /> Unlocking...</>
         ) : (
           <><Unlock size={15} /> Unlock Premium Resources</>
         )}
-      </button>
+      </Button>
     </form>
   );
 }
