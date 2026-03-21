@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkAdmin } from '@/lib/admin';
 
-// GET /api/admin/blog — List all blog posts (including drafts) for the admin
+/* ─── GET: Fetch all generated resources (for admin) ─────────────────────── */
+
 export async function GET() {
   try {
     const adminCheck = await checkAdmin();
@@ -15,29 +16,30 @@ export async function GET() {
 
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from('blog_posts')
+      .from('generated_resources')
       .select('*')
-      .order('date', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('[Admin Blog GET] Supabase error:', error);
+      console.error('[Admin Resources GET] DB error:', error);
       return NextResponse.json(
-        { error: `Failed to fetch blog posts: ${error.message}` },
+        { error: error.message },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ posts: data });
+    return NextResponse.json({ resources: data ?? [] });
   } catch (err) {
-    console.error('[Admin Blog GET] Unexpected error:', err);
+    console.error('[Admin Resources GET] Unexpected error:', err);
     return NextResponse.json(
-      { error: 'An unexpected error occurred' },
+      { error: 'Unexpected error' },
       { status: 500 }
     );
   }
 }
 
-// PUT /api/admin/blog — Update a blog post (toggle published, edit content, etc.)
+/* ─── PUT: Update a generated resource ───────────────────────────────────── */
+
 export async function PUT(req: NextRequest) {
   try {
     const adminCheck = await checkAdmin();
@@ -54,63 +56,47 @@ export async function PUT(req: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Post ID is required' },
+        { error: 'Resource ID is required' },
         { status: 400 }
       );
     }
 
-    // Map camelCase fields to snake_case DB columns if present
-    const dbUpdates: Record<string, unknown> = {};
-    const fieldMap: Record<string, string> = {
-      readTime: 'read_time',
-      visualType: 'visual_type',
-      keyTakeaways: 'key_takeaways',
-      coverImage: 'cover_image',
-    };
-
-    for (const [key, value] of Object.entries(updates)) {
-      if (value !== undefined) {
-        const dbKey = fieldMap[key] || key;
-        dbUpdates[dbKey] = value;
+    // Only allow updating specific fields
+    const allowedFields = ['title', 'description', 'content', 'type', 'category', 'free', 'published', 'download_url'];
+    const sanitized: Record<string, unknown> = {};
+    for (const key of allowedFields) {
+      if (key in updates) {
+        sanitized[key] = updates[key];
       }
     }
 
-    // Add updated_at timestamp
-    dbUpdates.updated_at = new Date().toISOString();
-
     const { data, error } = await supabase
-      .from('blog_posts')
-      .update(dbUpdates)
+      .from('generated_resources')
+      .update(sanitized)
       .eq('id', id)
       .select()
       .single();
 
     if (error) {
-      console.error('[Admin Blog PUT] Supabase error:', error);
+      console.error('[Admin Resources PUT] DB error:', error);
       return NextResponse.json(
-        { error: `Failed to update blog post: ${error.message}` },
+        { error: error.message },
         { status: 500 }
       );
     }
 
-    if (!data) {
-      return NextResponse.json(
-        { error: 'Blog post not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ success: true, post: data });
+    return NextResponse.json({ success: true, resource: data });
   } catch (err) {
-    console.error('[Admin Blog PUT] Unexpected error:', err);
+    console.error('[Admin Resources PUT] Unexpected error:', err);
     return NextResponse.json(
-      { error: 'An unexpected error occurred' },
+      { error: 'Unexpected error' },
       { status: 500 }
     );
   }
 }
 
-// DELETE /api/admin/blog — Delete a blog post by ID
+/* ─── DELETE: Delete a generated resource ────────────────────────────────── */
+
 export async function DELETE(req: NextRequest) {
   try {
     const adminCheck = await checkAdmin();
@@ -127,29 +113,29 @@ export async function DELETE(req: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Post ID is required (pass as ?id=...)' },
+        { error: 'Resource ID is required' },
         { status: 400 }
       );
     }
 
     const { error } = await supabase
-      .from('blog_posts')
+      .from('generated_resources')
       .delete()
       .eq('id', id);
 
     if (error) {
-      console.error('[Admin Blog DELETE] Supabase error:', error);
+      console.error('[Admin Resources DELETE] DB error:', error);
       return NextResponse.json(
-        { error: `Failed to delete blog post: ${error.message}` },
+        { error: error.message },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true, deletedId: id });
+    return NextResponse.json({ success: true });
   } catch (err) {
-    console.error('[Admin Blog DELETE] Unexpected error:', err);
+    console.error('[Admin Resources DELETE] Unexpected error:', err);
     return NextResponse.json(
-      { error: 'An unexpected error occurred' },
+      { error: 'Unexpected error' },
       { status: 500 }
     );
   }

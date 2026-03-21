@@ -33,15 +33,27 @@ const PUBLIC_NAV = [
   { href: '/contact', label: 'Contact' },
 ];
 
+const ADMIN_NAV = {
+  label: 'Admin',
+  children: [
+    { href: '/admin', label: 'Dashboard' },
+    { href: '/admin/blog', label: 'Blog Admin' },
+    { href: '/admin/resources', label: 'Resources Admin' },
+    { href: '/admin/users', label: 'User Management' },
+  ],
+};
+
 export function Header() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const navLinks = user
-    ? [...PUBLIC_NAV, { href: '/dashboard', label: 'Dashboard' }]
+    ? isAdmin
+      ? [...PUBLIC_NAV, { href: '/dashboard', label: 'Dashboard' }, ADMIN_NAV]
+      : [...PUBLIC_NAV, { href: '/dashboard', label: 'Dashboard' }]
     : PUBLIC_NAV;
 
   useEffect(() => {

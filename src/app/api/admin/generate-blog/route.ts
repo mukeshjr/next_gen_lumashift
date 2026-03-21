@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { checkAdmin } from '@/lib/admin';
 
 const BLOG_GENERATOR_SYSTEM_PROMPT = `You are a cybersecurity career blog writer for LumaShift, a Malaysian cybersecurity career coaching platform.
 
@@ -64,16 +65,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Authenticate user
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const adminCheck = await checkAdmin();
+    if (!adminCheck.authorized) {
       return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
+        { error: adminCheck.userId ? 'Admin access required' : 'Authentication required' },
+        { status: adminCheck.userId ? 403 : 401 }
       );
     }
 
@@ -147,6 +143,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Save to Supabase as a draft
+    const supabase = await createClient();
     const { data, error: dbError } = await supabase
       .from('blog_posts')
       .insert({
@@ -163,7 +160,7 @@ export async function POST(req: NextRequest) {
         visual_type: generated.visualType,
         key_takeaways: generated.keyTakeaways,
         generated_by_ai: true,
-        author_id: user.id,
+        author_id: adminCheck.userId!,
       })
       .select()
       .single();

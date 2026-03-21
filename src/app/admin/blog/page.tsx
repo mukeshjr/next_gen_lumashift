@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { checkAdmin } from '@/lib/admin';
 import { getAllPostsAdmin } from '@/lib/blog';
 import { getPublishedPosts } from '@/data/blog-posts';
 import BlogAdmin from '@/components/admin/BlogAdmin';
@@ -11,11 +11,12 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminBlogPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
+  const adminCheck = await checkAdmin();
+  if (!adminCheck.userId) {
     redirect('/auth/login?redirectTo=/admin/blog');
+  }
+  if (!adminCheck.authorized) {
+    redirect('/dashboard');
   }
 
   const [dbPosts, staticPosts] = await Promise.all([
@@ -27,7 +28,7 @@ export default async function AdminBlogPage() {
     <BlogAdmin
       initialPosts={dbPosts}
       staticPostCount={staticPosts.length}
-      userId={user.id}
+      userId={adminCheck.userId!}
     />
   );
 }

@@ -108,6 +108,8 @@ export interface FormData {
 
 // ─── User / Auth Types ────────────────────────────────────────────────────────
 
+export type UserRole = 'user' | 'admin';
+
 export interface UserProfile {
   id: string;
   name: string | null;
@@ -122,6 +124,7 @@ export interface UserProfile {
   certifications_obtained: string[];
   certifications_planned: string[];
   total_points: number;
+  role: UserRole;
   created_at: string;
   updated_at: string;
 }
